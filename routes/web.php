@@ -34,18 +34,18 @@ Route::get('/Sacli-Q.com/queue/{id}', [QueueController::class, 'viewQueue'])->na
 
 // Managing Windows of a queue (Admin)
 Route::get('/Sacli-Q.com/window/{id}', [QueueController::class, 'viewWindow'])->name('admin.window.view')->middleware(IsAdmin::class);
-Route::post('/Sacli-Q.com/window/add/{queue_id}', [QueueController::class, 'createWindow'])->name('admin.window.create')->middleware(IsAdmin::class);
+Route::post('/Sacli-Q.com/window/add/{id}', [QueueController::class, 'createWindow'])->name('admin.window.create')->middleware(IsAdmin::class);
 Route::delete('/Sacli-Q.com/window/remove/{id}', [QueueController::class, 'removeWindow'])->name('admin.window.delete')->middleware(IsAdmin::class);
 Route::post('/Sacli-Q.com/window/{id}/assignUser', [QueueController::class, 'assignUserToWindow'])->name('admin.window.user.add')->middleware(IsAdmin::class);
 Route::delete('/Sacli-Q.com/window/{id}/removeUser/{user_id}', [QueueController::class, 'removeUserFromWindow'])->name('admin.window.user.remove')->middleware(IsAdmin::class);
 
-//Queue Controlls (Admin)
+//Queue Controls (Admin)
 Route::post('/Sacli-Q.com/update-access/{user_id}/{queue_id}', [QueueController::class, 'updateAccess'])->name('update-access');
 Route::get('/Sacli-Q.com/queue/settings/{id}', [QueueController::class, 'manageQueue'])->name('queue.manage')->middleware(IsAdmin::class);
 Route::post('/Sacli-Q.com/queues/{id}/toggle', [QueueController::class, 'toggleQueue'])->name('queue.toggle')->middleware(ValidateUser::class);
 Route::post('/Sacli-Q.com/queues/{id}/clear', [QueueController::class, 'clearQueue'])->name('queue.clear')->middleware(ValidateUser::class);
 Route::post('/Sacli-Q.com/window-groups/{id}/toggle', [QueueController::class, 'toggleWindow'])->name('window.toggle')->middleware(ValidateUser::class);
-
+Route::post('/Sacli-Q.com/{id}/update-media-ads;', [QueueController::class, 'updateMediaAds'])->name('queue.advertisement')->middleware(ValidateUser::class);
 // Non-admin controls
 // User-specific queue routes
 Route::get('/Sacli-Q.com/my-queues', [QueueController::class, 'myQueuesAndWindows'])->name('myQueues')->middleware(ValidateUser::class);

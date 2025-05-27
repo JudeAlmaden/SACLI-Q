@@ -16,7 +16,6 @@
                 Loading window groups...
               </div>
             </div>
-        
             <!-- Queued Users Section -->
             <div id="tickets-container" class="p-6 bg-white border border-gray-300 rounded-lg shadow-2xl flex flex-col w-12/12 h-full">
               <h2 class="text-3xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -33,9 +32,8 @@
         </div>
         
             <div class="w-1/3">
-              <x-Carousel></x-Carousel>
+              <x-Carousel :queue="$queue"></x-Carousel>
             </div>
-              
         </div>          
     </x-slot>
 </x-App>
@@ -73,6 +71,7 @@
                                   }
                               </div>`;
                           windowsContainer.append(windowHtml);
+                          
                       });
                   } else {
                       windowsContainer.text('No window groups found.');
@@ -80,7 +79,8 @@
 
                   // Populate Queued Users
                   const ticketsContainer = $('#queued-users-placeholder');
-                  ticketsContainer.empty(); // Clear existing content
+                  ticketsContainer.empty(); 
+
                   if (response.ticketsOldest && response.ticketsOldest.length > 0) {
                       const ticketsHtml = `
                           <ul class="pl-6 list-disc text-lg text-gray-700 space-y-2">

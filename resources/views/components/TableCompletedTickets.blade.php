@@ -21,36 +21,31 @@
         background-color: #f3f4f6; /* Light background on hover */
         cursor: pointer;
     }
-
-    /* Hover effect when the header is dark mode */
-    th.dark:hover {
-        background-color: #4b5563; /* Darker background in dark mode */
-    }
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white mb-6 text-center">
+<div class="border p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-extrabold text-gray-800 mb-6 text-center">
         Recently Completed Tickets
     </h2>
-    <table id="completed-tickets" class="w-full border-none bg-white dark:bg-gray-800 border rounded-lg shadow-md">
-        <thead class="bg-gray-200 dark:bg-gray-700">
+    <table id="completed-tickets" class="w-full border-none bg-white border rounded-lg shadow-md">
+        <thead class="bg-gray-200">
             <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th id="sort-completed_tickets-ticket_number" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th id="sort-completed_tickets-ticket_number" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Number <span class="sort-arrow"></span>
                 </th>
-                <th id="sort-completed_tickets-created_at" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th id="sort-completed_tickets-created_at" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Completed At <span class="sort-arrow"></span>
                 </th>
             </tr>
         </thead>
         <tbody id="completed-tickets-body">
             <tr>
-                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" colspan="3">No completed tickets available.</td>
+                <td class="px-6 py-4 text-gray-600" colspan="3">No completed tickets available.</td>
             </tr>
         </tbody>
     </table>
@@ -58,7 +53,7 @@
     <!-- Pagination -->
     <div class="mt-4 flex justify-center">
         <button id="previous-completed" class="px-4 py-2 bg-gray-600 text-white rounded-lg" disabled>Previous</button>
-        <span id="completed-page-number" class="mx-4 text-gray-700 dark:text-gray-300">Page 1</span>
+        <span id="completed-page-number" class="mx-4 text-gray-700">Page 1</span>
         <button id="next-completed" class="px-4 py-2 bg-gray-600 text-white rounded-lg">Next</button>
     </div>
 </div>
@@ -91,14 +86,14 @@
                 url: `{{ route('getCompletedTickets', ['window_id' => $window->id]) }}?page=${page}&per_page=${completedTicketsPerPage}&sort_by=${sortBy}&sort_order=${sortOrder}`,
                 method: 'GET',
                 success: function (response) {
-                    if (response.success) {
+                    if (response.success && response.tickets.length > 0) {
                         totalCompletedPages = response.total_pages;
                         $('#completed-tickets-body').html(
                             response.tickets.map(ticket =>
                                 `<tr>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${ticket.code}</td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${ticket.ticket_number}</td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${formatDate(ticket.completed_at)}</td>
+                                    <td class="px-6 py-4 text-gray-600">${ticket.code}</td>
+                                    <td class="px-6 py-4 text-gray-600">${ticket.ticket_number}</td>
+                                    <td class="px-6 py-4 text-gray-600">${formatDate(ticket.completed_at)}</td>
                                 </tr>`
                             ).join('')
                         );
@@ -160,10 +155,10 @@
             }
         });
 
-     $('#next-completed').on('click', function() {
-        if (completedPage < totalCompletedPages) {
-            completedPage++;
-            getCompletedTickets(completedPage);
-        }
-    });
+        $('#next-completed').on('click', function() {
+            if (completedPage < totalCompletedPages) {
+                completedPage++;
+                getCompletedTickets(completedPage);
+            }
+        });
 </script>

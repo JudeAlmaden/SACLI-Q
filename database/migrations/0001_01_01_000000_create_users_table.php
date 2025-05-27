@@ -40,6 +40,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code')->unique();
+            $table->json('media_advertisement')->nullable();
             $table->string('status')->default('open');
             $table->timestamps();
         });
@@ -93,6 +94,7 @@ return new class extends Migration
         Schema::dropIfExists('queues');
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('password_reset_tokens');
     }
 };

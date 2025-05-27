@@ -97,7 +97,7 @@
           //Refresh page just in case admin changes window open/close or other data
           setTimeout(() => {
               location.reload()
-          }, 2000); // 2000ms = 2 seconds
+          }, 5000); // 2000ms = 2 seconds
       });
     });
 </script>

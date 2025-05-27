@@ -22,18 +22,17 @@
         cursor: pointer;
     }
 
-    /* Hover effect when the header is dark mode */
-    th.dark:hover {
-        background-color: #4b5563; /* Darker background in dark mode */
+    table{
+        font-size: 14px
     }
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+<div class="border p-6 rounded-lg shadow-lg">
     <div class="flex items-center justify-between mb-4">
         <!-- Heading -->
-        <h2 class="text-2xl font-extrabold text-gray-700 dark:text-white text-center">
+        <h2 class="text-2xl font-extrabold text-gray-700 text-center">
            Upcoming Tickets
         </h2>
         <!-- Search Bar -->
@@ -41,32 +40,32 @@
             <input
                 type="text"
                 id="search-upcoming"
-                class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                class="px-4 py-2 border rounded-lg"
                 placeholder="Search for tickets..."
             />
         </div>
     </div>
 
-    <table id="completed-tickets" class="w-full border-none bg-white dark:bg-gray-800 border rounded-lg shadow-md">
-        <thead class="bg-gray-200 dark:bg-gray-700">
+    <table id="completed-tickets" class="w-full border-none bg-white border rounded-lg shadow-md">
+        <thead class="bg-gray-200">
             <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th id="sort-ticket_number-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th id="sort-ticket_number-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Number <span class="sort-arrow"></span>
                 </th>
-                <th id="sort-created_at-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th id="sort-created_at-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Created At <span class="sort-arrow"></span>
                 </th>
-                <th id="sort-created_at-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th id="sort-created_at-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Action <span class="sort-arrow"></span>
                 </th>
             </tr>
         </thead>
         <tbody id="upcoming-tickets-body">
             <tr>
-                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" colspan="3">No completed tickets available.</td>
+                <td class="px-6 py-4 text-gray-600" colspan="3">No completed tickets available.</td>
             </tr>
         </tbody>
     </table>
@@ -74,7 +73,7 @@
     <!-- Pagination -->
     <div class="mt-4 flex justify-center">
         <button id="previous-upcoming" class="px-4 py-2 bg-gray-600 text-white rounded-lg" disabled>Previous</button>
-        <span id="upcoming_ticket-page-number" class="mx-4 text-gray-700 dark:text-gray-300">Page 1</span>
+        <span id="upcoming_ticket-page-number" class="mx-4 text-gray-700">Page 1</span>
         <button id="next-upcoming" class="px-4 py-2 bg-gray-600 text-white rounded-lg">Next</button>
     </div>
 </div>
@@ -108,15 +107,15 @@
             url: `{{ route('getUpcomingTickets', ['window_id' => $window->id]) }}?page=${page}&per_page=${upcomingTicketsPerPage}&sort_by=${sortByUpcomingTickets}&sort_order=${sortOrderUpcomingTickets}&search=${searchQueryUpcomingTicket}`,
             method: 'GET',
             success: function(response) {
-                if (response.success) {
+                if (response.success && response.tickets.length > 0) {
                     totalUpcomingTickets = response.total_pages;
                     $('#upcoming-tickets-body').html(
                         response.tickets.map(ticket =>
                             `<tr>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${ticket.code}</td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${ticket.ticket_number}</td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${formatDate(ticket.created_at)}</td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300 text-center">
+                                <td class="px-6 py-4 text-gray-600">${ticket.code}</td>
+                                <td class="px-6 py-4 text-gray-600">${ticket.ticket_number}</td>
+                                <td class="px-6 py-4 text-gray-600">${formatDate(ticket.created_at)}</td>
+                                <td class="px-6 py-4 text-gray-600 text-center">
                                     <button 
                                         onclick="handleUpcomingTicket(${ticket.id})"
                                         class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md border border-gray-400">
@@ -132,7 +131,7 @@
                 } else {
                     $('#upcoming-tickets-body').html(
                         `<tr>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300" colspan="3">No completed tickets available.</td>
+                            <td class="px-6 py-4 text-gray-600" colspan="3">No completed tickets available.</td>
                         </tr>`
                     );
                 }

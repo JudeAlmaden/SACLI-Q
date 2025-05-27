@@ -1,27 +1,38 @@
 
-  <div class="relative h-screen bg-white shadow-lg overflow-hidden rounded-lg shadow-inner" data-twe-carousel-init>
-    <!-- Carousel wrapper -->
-    <div class="carousel-container relative flex transition-transform duration-500 ease-in-out w-full h-full" style="transform: translateX(0);">
-      <!-- First item -->
-      <div class="carousel-item relative flex-shrink-0 w-full h-full">
-        <img src="https://psdfreebies.com/wp-content/uploads/2020/07/Kids-School-Admission-Flyer-PSD-Template-Preview.jpg" 
-              class="block w-full h-full object-cover" alt="First Image" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-      </div>
-      <!-- Second item -->
-      <div class="carousel-item relative flex-shrink-0 w-full h-full">
-        <img src="https://th.bing.com/th/id/OIP.6REoTayV8m0VqhXDA0VRCgHaHa?rs=1&pid=ImgDetMain" 
-              class="block w-full h-full object-cover" alt="Second Image" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-      </div>
-      <!-- Third item -->
-      <div class="carousel-item relative flex-shrink-0 w-full h-full">
-        <img src="https://th.bing.com/th/id/OIP.sJ26EgWpUjqdEybhpqajIwHaJP?rs=1&pid=ImgDetMain" 
-              class="block w-full h-full object-cover" alt="Third Image" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-      </div>
-    </div>
+<div class="relative h-screen bg-white shadow-lg overflow-hidden rounded-lg shadow-inner" data-twe-carousel-init>
+  <!-- Carousel wrapper -->
+  <div class="carousel-container relative flex transition-transform duration-500 ease-in-out w-full h-full" style="transform: translateX(0);">
+    @php
+        $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
+    @endphp
+
+    @if (!empty($mediaAds))
+        @foreach ($mediaAds as $mediaPath)
+            @if (!empty($mediaPath))
+                <div class="carousel-item relative flex-shrink-0 w-full h-full">
+                    <img 
+                      src="{{ asset('storage/' . $mediaPath) }}" 
+                      alt="Advertisement Image" 
+                      class="block w-full h-full object-cover" 
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                </div>
+            @endif
+        @endforeach
+    @else
+        <!-- Optional fallback if no images -->
+        <div class="carousel-item relative flex-shrink-0 w-full h-full">
+          <img 
+            src="https://via.placeholder.com/800x600?text=No+Advertisement" 
+            alt="No Advertisement" 
+            class="block w-full h-full object-cover" 
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        </div>
+    @endif
   </div>
+</div>
+
 
   <script>
       const carouselContainer = document.querySelector('.carousel-container');

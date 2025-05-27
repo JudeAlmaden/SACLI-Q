@@ -1,94 +1,68 @@
 <x-Dashboard>
     <x-slot name="content">
-        <div class="mt-12 pt-4 sm:ml-64 dark:bg-gray-700 min-h-screen">
-            <div class="mt-12 max-w-7xl mx-auto">
-                <!-- Window Group Info Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
-                    <div class="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center space-x-4">
-                            <i class="fas fa-window-maximize text-3xl text-blue-600"></i>
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $window->name }}</h1>
-                                <span class="text-md text-gray-500 dark:text-gray-400">Window Details</span>
-                            </div>
+        <div class="p-6 sm:ml-64 bg-white min-h-screen flex flex-col items-center pt-20">
+            <div class="w-full max-w-6xl space-y-8 mt">
+                <!-- Window Details -->
+                <div class="shadow-lg p-6 border rounded-lg">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <i class="fas fa-window-maximize text-3xl text-green-600"></i>
+                        <div>
+                            <h1 class="text-3xl font-bold">{{ $window->name }}</h1>
+                            <span class="text-gray-500">Window Details</span>
                         </div>
                     </div>
-                    <div class="px-6 py-4">
-                        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Description</h2>
-                        <p class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ $window->description }}
-                        </p>
-                    </div>
+                    <h2 class="text-lg font-bold">Description</h2>
+                    <p class="text-sm text-gray-700">{{ $window->description }}</p>
                 </div>
-
-                <!-- Assign Users Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                    <div class="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Assign Users</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                        <form action="{{ route('admin.window.user.add', ['id' => $window->id]) }}" method="POST">
-                            @csrf
-                            <div class="mb-4">
-                                <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select User</label>
-                                <select id="user_id" name="user_id" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
-                                    @foreach ($allUsers as $user)
-                                        @if (!$users->contains($user))
-                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex justify-end">
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Assign User</button>
-                            </div>
-                        </form>
-                    </div>
+                
+                <!-- Assign Users -->
+                <div class="shadow-lg p-6 border rounded-lg">
+                    <h2 class="text-xl font-bold mb-4">Assign Users</h2>
+                    <form action="{{ route('admin.window.user.add', ['id' => $window->id]) }}" method="POST" class="space-y-4">
+                        @csrf
+                        <select id="user_id" name="user_id" class="w-full p-2 border rounded">
+                            @foreach ($allUsers as $user)
+                                @if (!$users->contains($user))
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <button type="submit" class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">Assign</button>
+                    </form>
                 </div>
-
-                <!-- Users with Access Card -->
-                <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
-                    <div class="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Users with Access</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                        @if ($users->isNotEmpty())
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white dark:bg-gray-800">
-                                    <thead>
-                                        <tr>
-                                            <th class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                User
-                                            </th>
-                                            <th class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                Actions
-                                            </th>
+                
+                <!-- Users with Access -->
+                <div class="shadow-lg p-6 border rounded-lg">
+                    <h2 class="text-xl font-bold mb-4">Users with Access</h2>
+                    @if ($users->isNotEmpty())
+                        <div class="overflow-x-auto">
+                            <table class="w-full border">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="p-3 text-left text-sm font-medium text-gray-600">User</th>
+                                        <th class="p-3 text-left text-sm font-medium text-gray-600">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($users as $user)
+                                        <tr class="border-t">
+                                            <td class="p-3 text-sm">{{ $user->name }}</td>
+                                            <td class="p-3 text-sm">
+                                                <form action="{{ route('admin.window.user.remove', ['id' => $window->id, 'user_id' => $user->id]) }}" method="POST">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                                        <i class="fas fa-trash-alt"></i> Remove
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($users as $user)
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $user->name }}
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <form action="{{ route('admin.window.user.remove', ['id' => $window->id, 'user_id' => $user->id]) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900">
-                                                            <i class="fas fa-trash-alt"></i> Remove
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <p class="text-gray-700 dark:text-gray-300">No users have access to this window group.</p>
-                        @endif
-                    </div>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-gray-700">No users have access.</p>
+                    @endif
                 </div>
             </div>
         </div>

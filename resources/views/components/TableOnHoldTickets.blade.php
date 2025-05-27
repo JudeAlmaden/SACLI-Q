@@ -1,9 +1,9 @@
 <!-- On-Hold Tickets Section -->
-<div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+<div class="border p-6 rounded-lg shadow-lg">
     <!-- Flex Container -->
     <div class="flex items-center justify-between mb-4">
         <!-- Heading -->
-        <h2 class="text-2xl font-extrabold text-gray-700 dark:text-white text-center">
+        <h2 class="text-2xl font-extrabold text-gray-700 text-center">
             On-Hold Tickets
         </h2>
         <!-- Search Bar -->
@@ -11,29 +11,29 @@
             <input
                 type="text"
                 id="search-on-hold"
-                class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                class="px-4 py-2 border rounded-lg"
                 placeholder="Search for tickets..."
             />
         </div>
     </div>
     
-    <table id="on-hold-tickets" class="w-full border-none bg-white dark:bg-gray-800 border rounded-lg shadow-md">
-        <thead class="bg-gray-200 dark:bg-gray-700">
+    <table id="on-hold-tickets" class="w-full border-none bg-white border rounded-lg shadow-md">
+        <thead class="bg-gray-200">
             <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b">
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Called At
                 </th>
-                <th id="sort-action" class="px-6 py-3 text-left text-sm font-medium text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b text-center" >
-                    Action</span>
+                <th id="sort-action" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b text-center" >
+                    Action
                 </th>
             </tr>
         </thead>
         <tbody id="on-hold-tickets-body">
             <tr>
-                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" colspan="2">No on-hold tickets available.</td>
+                <td class="px-6 py-4 text-gray-600" colspan="2">No on-hold tickets available.</td>
             </tr>
         </tbody>
     </table>
@@ -41,13 +41,10 @@
     <!-- Pagination -->
     <div class="mt-4 flex justify-center">
         <button id="previous-on-hold" class="px-4 py-2 bg-gray-600 text-white rounded-lg" disabled>Previous</button>
-        <span id="on-hold-page-number" class="mx-4 text-gray-700 dark:text-gray-300">Page 1</span>
+        <span id="on-hold-page-number" class="mx-4 text-gray-700">Page 1</span>
         <button id="next-on-hold" class="px-4 py-2 bg-gray-600 text-white rounded-lg">Next</button>
     </div>
 </div>
-
-
-
 
 <script>
     // Pagination variables for On-Hold Tickets
@@ -56,7 +53,6 @@
     let totalOnHoldPages = 1;
     let searchQueryOnHoldTicket = '';  // Store search query
 
-    let potato = 2
     // Get On-Hold Tickets with Search
     function getOnHoldTickets(page = 1) {
 
@@ -85,16 +81,16 @@
                     if (response.tickets.length === 0) {
                         $('#on-hold-tickets-body').html(
                             `<tr>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" colspan="2">No on-hold tickets available.</td>
+                                <td class="px-6 py-4 text-gray-600" colspan="2">No on-hold tickets available.</td>
                             </tr>`
                         );
                     } else {
                         $('#on-hold-tickets-body').html(
                             response.tickets.map(ticket =>
                                 `<tr>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${ticket.code}</td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">${formatDate(ticket.called_at)}</td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300 text-center">
+                                    <td class="px-6 py-4 text-gray-600">${ticket.code}</td>
+                                    <td class="px-6 py-4 text-gray-600">${formatDate(ticket.called_at)}</td>
+                                    <td class="px-6 py-4 text-gray-600 text-center">
                                         <button 
                                             onclick="handleOnHoldTicket(${ticket.id})"
                                             class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md border border-gray-400">

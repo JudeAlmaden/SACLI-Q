@@ -13,6 +13,7 @@ class Queue extends Model
         'name',
         'status',
         'code',
+        'media_advertisement',
     ];
 
     public function windows(): HasMany

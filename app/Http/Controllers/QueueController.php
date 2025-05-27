@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Events\QueueSettingsChanged;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -79,8 +80,41 @@ class QueueController extends Controller
         $accessList = WindowAccess::whereIn('window_id', $WindowIds)->get();
         $userWindows = WindowAccess::with('Window')->whereIn('user_id', $uniqueUserIds)->get()->groupBy('user_id');
         
-        return view('admin.QueueWindows', compact('queue', 'uniqueUsers', 'accessList', 'userWindows'));
+        return view('admin.QueueManagement', compact('queue', 'uniqueUsers', 'accessList', 'userWindows'));
     }
+
+
+    public function updateMediaAds(Request $request, $id)
+    {
+        $queue = Queue::findOrFail($id);
+
+        // Delete existing images if any
+        $existingImages = json_decode($queue->media_advertisement ?? '[]', true);
+        if (!empty($existingImages)) {
+            foreach ($existingImages as $existingImage) {
+                if (Storage::disk('public')->exists($existingImage)) {
+                    Storage::disk('public')->delete($existingImage);
+                }
+            }
+        }
+
+        // Handle new uploads
+        $images = $request->file('Images');
+        $storedImages = [];
+
+        if ($images && is_array($images)) {
+            foreach ($images as $image) {
+                $path = $image->store('images', 'public');
+                $storedImages[] = $path;
+            }
+        }
+
+        $queue->media_advertisement = json_encode($storedImages);
+        $queue->save();
+
+        return back()->with('success', 'Images uploaded successfully.');
+    }
+
 
     //view a window  from a queue to see who are the users who has access
     public function viewWindow($id)
@@ -217,8 +251,7 @@ class QueueController extends Controller
     }
 
     //Other Controls
-    public function toggleWindow(Request $request, $id)
-    {
+    public function toggleWindow(Request $request, $id){
         $user = Auth::user();
         $window = Window::findOrFail($id);
         $queueId = $request->input('queue_id');

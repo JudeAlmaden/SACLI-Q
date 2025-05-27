@@ -2,37 +2,44 @@
 <x-Dashboard>
     <x-slot name="content">
 
-        <div class="mt-8 p-6 sm:ml-64 bg-gray-50 dark:bg-gray-900 min-h-screen rounded-lg shadow-lg">
+        <style>
+            .control-buttons button {
+                transition: transform 0.3s ease, background-color 0.3s ease;
+                height:  150px; /* Set a fixed height for all buttons */
+                font-size: 1.2rem; /* Increase font size for better visibility */
+            }
+        </style>
+
+        <div class="mt-16 p-6 sm:ml-64 bg-white min-h-screen rounded-lg shadow-lg">
             <!-- Header Section -->
             <header class="mb-8">
-                <div class="flex items-center space-x-4">
-                    <i class="fas fa-window-maximize text-4xl text-indigo-600"></i>
-                    <div>
-                        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">{{ $window->name }}</h1>
-                        <p class="text-md text-gray-600 dark:text-gray-400">
-                            Belongs to Queue: <span class="font-semibold">{{ $window->queue->name }}</span>
-                        </p>
-                    </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-window-maximize text-4xl text-green-600"></i>
+                <div>
+                <h1 class="text-4xl font-extrabold text-green-800">{{ $window->name }}</h1>
+                <p class="text-md text-green-700">
+                   <span class="font-semibold">{{ $window->queue->name }}</span>
+                </p>
                 </div>
+            </div>
             </header>
 
             <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
                 <div class="grid grid-cols-1 gap-3">
                     <!-- window Input Section -->
-                    <section class=" p-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Your window</h2>
-                        <form id="window-form" class="space-y-6 ">
+                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
+                        <form id="window-form" class="space-y-6">
                             <div class="flex items-center space-x-4">
-                                <label for="window-name" class="w-12/12 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    window Name:
+                                <label for="window-name" class="w-12/12 block font-medium text-green-700">
+                                    Window Name:
                                 </label>
                                 <input 
-                                type="text" 
-                                id="window-name" 
-                                name="window_name" 
-                                placeholder="{{ $windowAccess->window_name?? 'Ex: window 1' }}"
-                                class="flex-grow w-9/12 px-3 py-2 border border-gray-400 focus:border-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-md"
-                            >
+                                    type="text" 
+                                    id="window-name" 
+                                    name="window_name" 
+                                    placeholder="{{ $windowAccess->window_name ?? 'Ex: Window 1' }}"
+                                    class="flex-grow w-9/12 px-3 py-2 border border-green-400 focus:border-green-600 focus:ring-green-500 bg-white text-green-900 rounded-md"
+                                >
                                 <button type="submit" class="p-2 w-3/12 bg-green-600 text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-md">
                                     Submit
                                 </button>
@@ -41,45 +48,36 @@
                     </section>
 
                     <!-- Combined Description Section -->
-                    <section class="p-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-md">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Details</h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-2">
-                            <strong>window For:</strong> {{ $window->name }} - {{ $window->description }}
-                        </p>
-                        <p class="text-gray-600 dark:text-gray-300">
-                            <strong>Queue:</strong> {{ $window->queue->name }} 
-                        </p>
-                        <div class="mt-6 p-4 bg-gray-700 text-white rounded-lg shadow-lg">
-                            <h2 class="text-xl font-bold mb-2">Number of tickets left: </h2>
-                            <strong id="upcoming-tickets-count" class="text-2xl font-semibold"></strong>
+                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
+                        <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
+                            <h2 class="text-xl font-bold mb-2">Number of tickets left: <span id="upcoming-tickets-count" class="text-2xl font-semibold"></span></h2>
                         </div>
                     </section>
                 </div>
                 
                 <div class="grid grid-cols-1">
                     <!-- Currently Handling Section -->
-                    <section class="p-8 bg-green-50 dark:bg-green-900 border-2 border-green-500 rounded-lg shadow-lg">
-                        <h2 class="text-4xl font-extrabold text-green-800 dark:text-green-200 mb-6 text-center">Currently Handling</h2>
+                    <section class="p-8 bg-white border-2 border-green-600 rounded-lg shadow-lg">
+                        <h2 class="text-4xl font-extrabold text-green-800 mb-6 text-center">Currently Handling</h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-2xl">
-                            <p class="w-full flex items-center justify-between text-green-800 dark:text-green-100 bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
+                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
                                 <strong class="block">Ticket:</strong> 
-                                <span id="current-ticket-number" class="font-semibold text-green-600 dark:text-green-300">N/A</span>
+                                <span id="current-ticket-number" class="font-semibold text-green-600">N/A</span>
                             </p>
-                            <p class="w-full flex items-center justify-between text-green-800 dark:text-green-100 bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
+                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
                                 <strong class="block">Name:</strong> 
-                                <span id="current-ticket-name" class="font-semibold text-green-600 dark:text-green-300">N/A</span>
+                                <span id="current-ticket-name" class="font-semibold text-green-600">N/A</span>
                             </p>
                         </div>
                     </section>
-                    
                 </div>
             </div>
 
 
             <!-- Actions Section -->   
-            <section class="mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-md">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Actions</h2>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <section class="mt-6 p-6 bg-white border border-gray-300 0 rounded-lg border-green-300 r shadow-md">
+                <h2 class="text-xl font-bold text-gray-800  mb-4">Actions</h2>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 control-buttons">
                     <button 
                         id="next-ticket"
                         class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
