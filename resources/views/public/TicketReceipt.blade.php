@@ -11,7 +11,7 @@
                 
                 <div class="text-center">
                     <p class="text-2xl text-gray-800 mb-4"><strong>Code:</strong> {{ $Ticket->code }}</p>
-                    <p class="text-xl text-gray-600 mb-4"><strong>Ticket #:</strong> {{ $Ticket->ticket_number ?? 'N/A' }}</p>
+                    <p class="text-xl text-gray-600 mb-4"><strong>Ticket Position:</strong> {{ $Ticket->ticket_number ?? 'N/A' }}</p>
                     <p class="text-xl text-gray-600 mb-4"><strong>Name:</strong> {{ $Ticket->name ?? 'N/A' }}</p>
                     <p class="text-xl text-gray-600 mb-4"><strong>Window:</strong> {{ $Ticket->window->name }}</p>
                     <p class="text-xl text-gray-600 mb-4"><strong>Status:</strong> {{ $Ticket->status }}</p>

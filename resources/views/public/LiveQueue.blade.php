@@ -100,47 +100,71 @@
       });
 
 
+    // Play "ding-dong" sound before speaking ticket number
+    Echo.channel('live-queue.{{ $queue->id }}')
+      .listen('CallingTicket', (e) => {
+        setTimeout(() => {
+          const videos = document.querySelectorAll('video.carousel-media');
+          const originalVolumes = [];
 
-  Echo.channel('live-queue.{{ $queue->id }}')
-    .listen('CallingTicket', (e) => {
-      setTimeout(() => {
-        const videos = document.querySelectorAll('video.carousel-media');
-        const originalVolumes = [];
+          // Lower volume of all videos
+          videos.forEach((video, i) => {
+            originalVolumes[i] = video.volume;
+            video.volume = 0.1;  // or any low volume you prefer
+          });
 
-        // Lower volume of all videos
-        videos.forEach((video, i) => {
-          originalVolumes[i] = video.volume;
-          video.volume = 0.1;  // or any low volume you prefer
-        });
+          function textToSpeech(text) {
+            if ('speechSynthesis' in window) {
+              const utterance = new SpeechSynthesisUtterance(text);
+              utterance.lang = 'en-US';
 
-        function textToSpeech(text) {
-          if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
+              utterance.onend = () => {
+                // Restore original volumes when speech ends
+                videos.forEach((video, i) => {
+                  video.volume = originalVolumes[i];
+                });
+              };
 
-            utterance.onend = () => {
-              // Restore original volumes when speech ends
+              speechSynthesis.speak(utterance);
+            } else {
+              console.error('Text-to-speech is not supported in this browser.');
+              // Restore volumes if TTS not supported
               videos.forEach((video, i) => {
                 video.volume = originalVolumes[i];
               });
-            };
-
-            speechSynthesis.speak(utterance);
-          } else {
-            console.error('Text-to-speech is not supported in this browser.');
-            // Restore volumes if TTS not supported
-            videos.forEach((video, i) => {
-              video.volume = originalVolumes[i];
-            });
+            }
           }
-        }
 
-        textToSpeech('Calling Ticket Number ' + e.ticketNumber + ' to go to ' + e.windowName);
+          // Usage
+          speakTicketNumber(e.ticketNumber);
 
-      }, 2000);
-    });
+        }, 2000);
+      });
+
+
+    function playDingDong() {
+      const audio = new Audio('{{ asset('storage/ding-dong-sfx.mp3') }}');
+      audio.play();
+      return new Promise(resolve => {
+        audio.onended = resolve;
+        // In case audio fails to play, resolve after 2 seconds
+        audio.onerror = () => setTimeout(resolve, 2000);
+      });
+    }
+
+    async function speakTicketNumber(ticketNumber) {
+      await playDingDong();
+
+      const msg = new SpeechSynthesisUtterance();
+      msg.text = `Calling ticket number ${ticketNumber}`;
+      const voices = window.speechSynthesis.getVoices();
+      msg.voice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google')) || voices[0];
+      msg.rate = 0.9;
+      msg.pitch = 1.1;
+      msg.volume = 1;
+      window.speechSynthesis.speak(msg);
+    }
+
   });
-
-
 
 </script>

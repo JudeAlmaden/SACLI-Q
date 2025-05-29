@@ -97,8 +97,10 @@ class PublicController extends Controller
                 $code = '0001';
             }
             
-            // Get the next ticket number for the window
-            $ticket_number = Ticket::where('window_id', $request->window_id)->max('ticket_number');
+            // Get the next ticket number for the window and increment it to 1 and it will use it for the ticket number here
+            $ticket_number = Ticket::where('window_id', $request->window_id)
+                      ->whereDate('created_at', Carbon::today())
+                      ->max('ticket_number');
             $ticket_number = $ticket_number ? $ticket_number + 1 : 1;
     
             // Create a new Ticket record
@@ -122,7 +124,7 @@ class PublicController extends Controller
     
     public function ticketingSuccess($id)
     {
-        $Ticket = Ticket::with('window')->findOrFail($id);
+        $Ticket = Ticket::with('window')->whereDate('created_at', Carbon::today())->findOrFail($id);
         $Queue = Queue::findOrFail($Ticket->queue_id);
         return view('public.TicketReceipt', compact('Ticket', 'Queue'));
     }
@@ -141,7 +143,8 @@ class PublicController extends Controller
             ->with('window')
             ->where('code', $ticketCode)
             ->where('status', '!=', 'Completed')
-            ->where('queue_id', $queue_id) 
+            ->where('queue_id', $queue_id)
+            ->whereDate('created_at', Carbon::today()) 
             ->first();
         
         if (!$ticket) {
@@ -158,6 +161,7 @@ class PublicController extends Controller
             // Get the position of the ticket in the queue based on its 'created_at'
             $ticketPosition = Ticket::where('queue_id', $ticket->queue_id)
                                     ->where('status', 'Waiting')
+                                    ->whereDate('created_at', Carbon::today())
                                     ->orderBy('created_at', 'asc')  // Oldest ticket is first
                                     ->pluck('id'); // Get list of ticket IDs in order of waiting
     

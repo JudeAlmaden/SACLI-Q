@@ -70,7 +70,7 @@ return new class extends Migration
 
         Schema::create('tickets', function (Blueprint $table) {
             $table->id()->unique();
-            $table->int('code');
+            $table->string('code');
             $table->string('name')->nullable();
             $table->string('status')->default('Waiting');
             $table->integer('ticket_number');
@@ -81,6 +81,8 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
+
+        
     }
 
     /**

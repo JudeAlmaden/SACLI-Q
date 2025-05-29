@@ -139,6 +139,7 @@ class APIController extends Controller
         $onCalled = Ticket::where('window_id', $WindowId)
                         ->where('handled_by', $user_id)
                         ->where('status', 'Calling')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->count();
 
         if($onCalled > 0){
@@ -150,6 +151,7 @@ class APIController extends Controller
         //Handles a ticket  the next ticket for the given window 
         $Ticket = Ticket::where('window_id', $WindowId)
                         ->where('status', 'Waiting')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->orderBy('created_at', 'asc')
                         ->first();
 
@@ -200,6 +202,7 @@ class APIController extends Controller
         $Ticket = Ticket::where('window_id', $WindowId)
                         ->where('handled_by', $user_id)
                         ->where('status', 'Calling')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->first();
 
         if ($Ticket) {
@@ -224,6 +227,7 @@ class APIController extends Controller
         $onCall = Ticket::where('window_id', $WindowId)
                         ->where('handled_by', $user_id)
                         ->where('status', 'Calling')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->count();
 
         if($onCall > 0){
@@ -235,6 +239,7 @@ class APIController extends Controller
         //Gets the next ticket for the given window group by status of On Hold
         $Ticket = Ticket::where('window_id', $WindowId)
                         ->where('status', 'On Hold')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->orderBy('created_at', 'asc')
                         ->first();
 
@@ -283,6 +288,7 @@ class APIController extends Controller
         $Ticket = Ticket::where('window_id', $WindowId)
                         ->where('handled_by', $user_id)
                         ->where('status', 'Calling')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->first();
 
         if ($Ticket) {
@@ -301,6 +307,7 @@ class APIController extends Controller
     public function getWindowUserData($WindowId){
         $upcomingTicketsCount = Ticket::where('window_id', $WindowId)
                                         ->where('status', 'Waiting')
+                                        ->whereDate('created_at', Carbon::today()) 
                                         ->count();
     
         return response()->json(['success' => true, 'upcoming_tickets_count' => $upcomingTicketsCount]);
@@ -315,6 +322,7 @@ class APIController extends Controller
         $onCalled = Ticket::where('window_id', $WindowId)
                         ->where('handled_by', $user_id)
                         ->where('status', 'Calling')
+                        ->whereDate('created_at', Carbon::today()) 
                         ->count();
 
         if($onCalled > 0){
@@ -326,6 +334,7 @@ class APIController extends Controller
         // Get the ticket for the given window based on Ticket id and ensure that the status is 'On Hold' or 'Waiting'
         $Ticket = Ticket::where('window_id', $WindowId)
                         ->where('id', $TicketId)
+                        ->whereDate('created_at', Carbon::today()) 
                         ->whereIn('status', ['On Hold', 'Waiting'])
                         ->first(); 
                         
@@ -375,7 +384,9 @@ class APIController extends Controller
         $page = $request->input('page', 1);
         $perPage = $request->input('per_page', 20);
     
-        $query = Ticket::where('window_id', $WindowId)->where('status', 'On Hold');
+        $query = Ticket::where('window_id', $WindowId)
+                        ->where('status', 'On Hold')
+                        ->whereDate('created_at', Carbon::today()) ;
     
         // Apply search if query exists
         if ($search) {
@@ -400,6 +411,7 @@ class APIController extends Controller
         // Get tickets, paginate, and apply dynamic sorting
         $tickets = Ticket::where('window_id', $WindowId)
                          ->where('status', 'Waiting')
+                         ->whereDate('created_at', Carbon::today()) 
                          ->orderBy($sortBy, $sortOrder) // Apply dynamic sorting
                          ->paginate($perPage);
     
@@ -421,6 +433,7 @@ class APIController extends Controller
         // Get tickets, paginate, and apply dynamic sorting
         $tickets = Ticket::where('window_id', $WindowId)
                          ->where('status', 'Completed')
+                         ->whereDate('created_at', Carbon::today()) 
                          ->orderBy($sortBy, $sortOrder) // Apply dynamic sorting
                          ->paginate($perPage);
     
