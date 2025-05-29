@@ -254,6 +254,35 @@ $(document).ready(function() {
         });
     });
    
+    $('#call-ticket').on('click', function(event) {
+        event.preventDefault();
+
+        const ticketNumber = $('#current-ticket-number').text().replace(/\D/g, '');
+
+        $.ajax({
+            url: "{{ route('broadcast.callTicket.event') }}", // no need for route parameters
+            method: 'POST',
+            data: {
+                window_name: "{{ $windowAccess->window_name}}", //name of the user with access to the window
+                ticket_number: ticketNumber,  
+                queue_id: "{{ $window->queue_id}}", //queue code is alias for queueID
+                _token: "{{ csrf_token() }}"  
+            },
+            success: function(response) {
+                if (response.success) {
+                    getTablesAndData();
+                    alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+                alert("Error while fetching data");
+            }
+        });
+    });
+
     //Fetch methods for getting data
     function getCurrentTicketData() {
         
@@ -330,12 +359,9 @@ $(document).ready(function() {
 
     getTablesAndData();
 
-
-
     //For Synchronous Session With Live View
     Echo.channel('live-queue.{{$window->queue_id}}')
     .listen('NewTicketEvent', () => {
-        console.log("A Ticket event has been detected");
         
         // Add a timeout before calling getLiveData
         setTimeout(() => {

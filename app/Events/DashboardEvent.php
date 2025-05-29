@@ -15,16 +15,16 @@ class DashboardEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $queueCode; // Dynamic queue name
+    public $queueId; // Dynamic queue name
 
     /**
      * Create a new event instance.
      *
-     * @param string $queueCode
+     * @param string $queueId
      */
-    public function __construct($queueCode)
+    public function __construct($queueId)
     {
-        $this->queueCode = $queueCode;
+        $this->queueId = $queueId;
     }
 
     /**
@@ -35,7 +35,7 @@ class DashboardEvent implements ShouldBroadcastNow
     //Broadcast an event on a channel
     public function broadcastOn()
     {
-        return [new Channel('live-queue.'.$this->queueCode)];
+        return [new Channel('live-queue.'.$this->queueId)];
     }
 
     public function broadcastWith()

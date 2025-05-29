@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 use App\Events\DashboardEvent;
 use App\Events\NewTicketEvent;
+use App\Events\CallingTicket; // Assuming you have this event for broadcasting ticket calls
+use Illuminate\Support\Facades\Validator;
 
 class PublicController extends Controller
 {
@@ -83,7 +85,17 @@ class PublicController extends Controller
             }
     
             // Generate a unique 6-character code
-            $code = $this->generateUniqueCode();
+            // Get the largest ticket code for this queue today
+            $latestTicket = Ticket::where('queue_id', $request->queue_id)
+                ->whereDate('created_at', Carbon::today())
+                ->orderByDesc('created_at')
+                ->first();
+
+            if ($latestTicket && is_numeric($latestTicket->code)) {
+                $code = str_pad((int)$latestTicket->code + 1, 4, '0', STR_PAD_LEFT);
+            } else {
+                $code = '0001';
+            }
             
             // Get the next ticket number for the window
             $ticket_number = Ticket::where('window_id', $request->window_id)->max('ticket_number');
@@ -115,29 +127,27 @@ class PublicController extends Controller
         return view('public.TicketReceipt', compact('Ticket', 'Queue'));
     }
 
-    /**
-     * Generate a unique 6-character alphanumeric code.
-     */
-    private function generateUniqueCode()
-    {
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        do {
-            $code = substr(str_shuffle($characters), 0, 6); // Generate random 6-character code
-        } while (Ticket::where('code', $code)->exists()); // Ensure uniqueness
-
-        return $code;
-    }
 
     public function info(Request $request)
     {
         $ticketCode = $request->input('ticketCode'); // Get the ticket code from the request
-        
-        // Search for the ticket by code
-        $ticket = Ticket::with('queue')->with('window')->where('code', $ticketCode)->first();
+        $queue_id = $request->input('queue_id'); // Get the queue ID from the request
+
+
+        $allQueues = Queue::all(); // Get all queues for the dropdown
+
+        // Search for the ticket by code and where status is not "Completed"
+        $ticket = Ticket::with('queue')
+            ->with('window')
+            ->where('code', $ticketCode)
+            ->where('status', '!=', 'Completed')
+            ->where('queue_id', $queue_id) 
+            ->first();
         
         if (!$ticket) {
             // If no ticket is found, return with an error message
-            return view('public.info', ['message' => 'Ticket not found.']);
+            $message = 'Ticket not found.';
+            return view('public.info', compact('message', 'allQueues'));
         }
     
         // Initialize ticket position
@@ -156,8 +166,44 @@ class PublicController extends Controller
         }
     
         // Pass the ticket and position to the view
-        return view('public.info', compact('ticket', 'ticketPosition'));
+        return view('public.info', compact('ticket', 'ticketPosition', 'allQueues'));
     }
     
-    
+    public function broadcastEventCallTicket(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'queue_id' => 'required',
+            'ticket_number' => 'required',
+            'window_name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Invalid request data.',
+            ], 422);
+        }
+
+        // Store values
+        $queue_id = $request->queue_id;
+        $ticketNumber = $request->ticket_number;
+        $windowName = $request->window_name;
+
+        // Broadcast the event
+        broadcast(new CallingTicket($queue_id, $ticketNumber, $windowName));
+
+        // Return the broadcasted data as part of the success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Event broadcasted',
+            'data' => [
+                'ticketNumber' => $ticketNumber,
+                'windowName' => $windowName,
+                'queueCode' => $queue_id,
+            ]
+        ]);
+    }
+
+
 }

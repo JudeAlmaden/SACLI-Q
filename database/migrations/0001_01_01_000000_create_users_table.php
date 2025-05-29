@@ -69,8 +69,8 @@ return new class extends Migration
         });
 
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique();
+            $table->id()->unique();
+            $table->int('code');
             $table->string('name')->nullable();
             $table->string('status')->default('Waiting');
             $table->integer('ticket_number');

@@ -17,16 +17,16 @@ class QueueSettingsChanged implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public $queueCode; // Dynamic queue name
+    public $queueId; // Dynamic queue name
 
     /**
      * Create a new event instance.
      *
-     * @param string $queueCode
+     * @param string $queueId
      */
-    public function __construct($queueCode)
+    public function __construct($queueId)
     {
-        $this->queueCode = $queueCode;
+        $this->queueId = $queueId;
     }
 
     /**
@@ -37,7 +37,7 @@ class QueueSettingsChanged implements ShouldBroadcastNow
     //Broadcast an event on a channel
     public function broadcastOn()
     {
-        return [new Channel('live-queue.'.$this->queueCode)];
+        return [new Channel('live-queue.'.$this->queueId)];
     }
 
     public function broadcastWith()

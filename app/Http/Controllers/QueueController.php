@@ -36,21 +36,26 @@ class QueueController extends Controller
     public function createQueue(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:queues,name',
+            'name' => 'required|string|max:255|unique:queues,name',
             'window_groups' => 'array',
             'window_groups.*.name' => 'string',
             'window_groups.*.description' => 'string',
         ]);
-    
+
+        // Double-check uniqueness in case of race condition
+        if (Queue::where('name', $request->name)->exists()) {
+            return redirect()->back()->withErrors(['name' => 'Queue name must be unique.'])->withInput();
+        }
+
         // Generate a unique 6-character code
         $uniqueCode = $this->generateUniqueCode();
-    
+
         // Create and save the queue
         $queue = new Queue();
         $queue->name = $request->name;
-        $queue->code = $uniqueCode; // Assign the generated unique code
+        $queue->code = $uniqueCode; 
         $queue->save();
-    
+
         // Save associated window groups if provided
         if ($request->window_groups != null) {
             foreach ($request->window_groups as $WindowData) {
@@ -58,7 +63,7 @@ class QueueController extends Controller
                 $queue->Windows()->save($Window);
             }
         }
-    
+
         return redirect()->route('admin.queue.list')->with('success', 'Queue created successfully.');
     }
     
@@ -88,31 +93,32 @@ class QueueController extends Controller
     {
         $queue = Queue::findOrFail($id);
 
-        // Delete existing images if any
-        $existingImages = json_decode($queue->media_advertisement ?? '[]', true);
-        if (!empty($existingImages)) {
-            foreach ($existingImages as $existingImage) {
-                if (Storage::disk('public')->exists($existingImage)) {
-                    Storage::disk('public')->delete($existingImage);
+        // Delete existing media files if any
+        $existingMedia = json_decode($queue->media_advertisement ?? '[]', true);
+        if (!empty($existingMedia)) {
+            foreach ($existingMedia as $existingFile) {
+                if (Storage::disk('public')->exists($existingFile)) {
+                    Storage::disk('public')->delete($existingFile);
                 }
             }
         }
 
-        // Handle new uploads
-        $images = $request->file('Images');
-        $storedImages = [];
+        // Handle new uploads (images and videos)
+        $files = $request->file('File');
+        $storedMedia = [];
 
-        if ($images && is_array($images)) {
-            foreach ($images as $image) {
-                $path = $image->store('images', 'public');
-                $storedImages[] = $path;
+        if ($files && is_array($files)) {
+            foreach ($files as $file) {
+                // Optionally, you can validate file type here
+                $path = $file->store('media', 'public');
+                $storedMedia[] = $path;
             }
         }
 
-        $queue->media_advertisement = json_encode($storedImages);
+        $queue->media_advertisement = json_encode($storedMedia);
         $queue->save();
 
-        return back()->with('success', 'Images uploaded successfully.');
+        return back()->with('success', 'Media files uploaded successfully.');
     }
 
 

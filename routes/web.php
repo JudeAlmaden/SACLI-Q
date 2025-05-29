@@ -11,8 +11,9 @@ use App\Http\Middleware\ValidateUser;
 use App\Http\Middleware\IsAdmin;
 
 
-// Broadcast route
+// Broadcast route, queue ID is obtained through the controller class
 Route::get('/Sacli-Q.com/broadcast', [PublicController::class, 'broadcastEvent'])->name('broadcast.event');
+Route::post('/Sacli-Q.com/broadcast/callTicket/', [PublicController::class, 'broadcastEventCallTicket'])->name('broadcast.callTicket.event');
 
 // Main routes
 Route::get('/Sacli-Q.com', [MainController::class, 'index'])->name('index'); // Working
@@ -46,6 +47,7 @@ Route::post('/Sacli-Q.com/queues/{id}/toggle', [QueueController::class, 'toggleQ
 Route::post('/Sacli-Q.com/queues/{id}/clear', [QueueController::class, 'clearQueue'])->name('queue.clear')->middleware(ValidateUser::class);
 Route::post('/Sacli-Q.com/window-groups/{id}/toggle', [QueueController::class, 'toggleWindow'])->name('window.toggle')->middleware(ValidateUser::class);
 Route::post('/Sacli-Q.com/{id}/update-media-ads;', [QueueController::class, 'updateMediaAds'])->name('queue.advertisement')->middleware(ValidateUser::class);
+
 // Non-admin controls
 // User-specific queue routes
 Route::get('/Sacli-Q.com/my-queues', [QueueController::class, 'myQueuesAndWindows'])->name('myQueues')->middleware(ValidateUser::class);
@@ -75,7 +77,8 @@ Route::get('/Sacli-Q.com/api/queue/{id}', [APIController::class, 'getLiveData'])
 
 Route::get('/Sacli-Q.com/api/window/{window_id}/set-limit/{limit}', [APIController::class, 'setLimit'])->name('window.setLimit'); 
 
-Route::get('/Sacli-Q.com/info', [PublicController::class, 'info'])->name('info'); // Working
+//Viewing information
+Route::get('/Sacli-Q.com/info', [PublicController::class, 'info'])->name('info'); 
 
 
 // Fallback route

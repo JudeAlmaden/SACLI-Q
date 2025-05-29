@@ -186,13 +186,20 @@
                     <form action="{{ route('queue.advertisement', ['id' => $queue->id]) }}" method="POST" enctype="multipart/form-data" class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col gap-4">
                         @csrf
 
+                        <div id="uploadMessage" class="hidden flex items-center justify-center mt-4 text-gray-700">
+                                <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                </svg>
+                                Uploading files, please wait...
+                        </div>
                         <!-- File Input -->
                         <div class="flex justify-center">
                             <label for="image" class="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-800">
-                                <span class="material-symbols-outlined text-2xl">image</span>
-                                <span>Select Images</span>
+                                <span class="material-symbols-outlined text-2xl">Files</span>
+                                <span>Select Files</span>
                             </label>
-                            <input type="file" id="image" name="Images[]" accept="image/*" multiple class="hidden">
+                            <input type="file" id="image" name="File[]" accept="image/*,video/*" multiple class="hidden">
                         </div>
 
                         <!-- Preview Area -->
@@ -202,17 +209,32 @@
                             @endphp
                             @if (!empty($mediaAds))
                                 @foreach ($mediaAds as $mediaPath)
-                                    @if (!empty($mediaPath))
+                                    @php
+                                        $fullPath = asset('storage/' . $mediaPath);
+                                        $extension = pathinfo($mediaPath, PATHINFO_EXTENSION);
+                                    @endphp
+
+                                    @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
                                         <img 
-                                            src="{{ asset('storage/' . $mediaPath) }}"  
-                                            data-full="{{ asset('storage/' . $mediaPath) }}"
+                                            src="{{ $fullPath }}"  
+                                            data-full="{{ $fullPath }}"
                                             class="thumbnail rounded shadow cursor-pointer" 
                                             style="max-width: 100px; max-height: 100px;"
                                         />
+                                    @elseif (in_array(strtolower($extension), ['mp4', 'webm', 'ogg']))
+                                        <video 
+                                            src="{{ $fullPath }}" 
+                                            controls 
+                                            class="rounded shadow cursor-pointer"
+                                            style="max-width: 100px; max-height: 100px;"
+                                        >
+                                            Your browser does not support the video tag.
+                                        </video>
                                     @endif
                                 @endforeach
                             @endif
                         </div>
+
 
                         <!-- Submit -->
                         <div class="flex justify-end">
@@ -221,13 +243,22 @@
                     </form>
                 </div>
 
+                {{-- Unified Media Modal --}}
+                <div id="mediaModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+                    <div class="relative max-w-[90%] max-h-[90%]">
+                        <button id="closeModal" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
 
-                {{-- Image preview --}}
-                <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
-                <div class="relative max-w-[90%] max-h-[90%]">
-                    <button id="closeModal" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
-                    <img id="modalImage" src="" class="max-w-screen max-h-screen rounded shadow-xl" />
+                        {{-- Image Viewer --}}
+                        <img id="modalImage" src="" class="max-w-screen max-h-screen rounded shadow-xl hidden" />
+
+                        {{-- Video Viewer --}}
+                        <video id="modalVideo" controls class="max-w-screen max-h-screen rounded shadow-xl hidden">
+                            <source id="modalVideoSource" src="" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
                 </div>
+
                 </div>
 
             </div>
@@ -235,7 +266,7 @@
     </x-slot>
 </x-Dashboard>
 
-                  
+{{--This just turns on the modal or something  --}}
 <script>
     function toggleModal(show) {
         document.getElementById('modal').classList.toggle('hidden', !show);
@@ -292,18 +323,39 @@
             const $statusMessage = $(this).closest('.relative').find('.statusMessage');
 
             if ($statusMessage.length) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    $statusMessage.removeClass('opacity-0').show();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        $statusMessage.removeClass('opacity-0').show();
 
-                    setTimeout(() => {
-                        $statusMessage.fadeOut(1000, function () {
-                            $(this).addClass('opacity-0').hide();
-                        });
-                    }, 2000);
-                }).catch(err => {
-                    $statusMessage.text('Failed to copy text.').css('color', 'red').show();
-                    console.error('Copy failed:', err);
-                });
+                        setTimeout(() => {
+                            $statusMessage.fadeOut(1000, function () {
+                                $(this).addClass('opacity-0').hide();
+                            });
+                        }, 2000);
+                    }).catch(err => {
+                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
+                        console.error('Copy failed:', err);
+                    });
+                } else {
+                    // Fallback for browsers that do not support navigator.clipboard
+                    const tempInput = document.createElement('input');
+                    tempInput.value = textToCopy;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    try {
+                        document.execCommand('copy');
+                        $statusMessage.removeClass('opacity-0').show();
+                        setTimeout(() => {
+                            $statusMessage.fadeOut(1000, function () {
+                                $(this).addClass('opacity-0').hide();
+                            });
+                        }, 2000);
+                    } catch (err) {
+                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
+                        console.error('Copy failed:', err);
+                    }
+                    document.body.removeChild(tempInput);
+                }
             }
         });
     });
@@ -312,49 +364,103 @@
 
 {{-- Media Preview Functions --}}
 <script>
-  document.querySelectorAll('.thumbnail').forEach(img => {
-    img.addEventListener('click', () => {
-      const modal = document.getElementById('imageModal');
-      const modalImg = document.getElementById('modalImage');
-      modalImg.src = img.dataset.full;
-      modal.classList.remove('hidden');
+    // Open modal with either image or video
+    document.querySelectorAll('.thumbnail').forEach(el => {
+        el.addEventListener('click', () => {
+            const fullPath = el.dataset.full;
+            const isVideo = fullPath.match(/\.(mp4|webm|ogg)$/i);
+
+            const modal = document.getElementById('mediaModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalVideo = document.getElementById('modalVideo');
+            const modalVideoSource = document.getElementById('modalVideoSource');
+
+            if (isVideo) {
+                modalImage.classList.add('hidden');
+                modalImage.src = '';
+
+                modalVideoSource.src = fullPath;
+                modalVideo.load();
+                modalVideo.classList.remove('hidden');
+            } else {
+                modalVideo.pause();
+                modalVideo.classList.add('hidden');
+                modalVideoSource.src = '';
+
+                modalImage.src = fullPath;
+                modalImage.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        });
     });
-  });
 
-  document.getElementById('closeModal').addEventListener('click', () => {
-    document.getElementById('imageModal').classList.add('hidden');
-  });
+    // Close modal logic
+    const closeModal = document.getElementById('closeModal');
+    closeModal.addEventListener('click', () => {
+        const modal = document.getElementById('mediaModal');
+        const video = document.getElementById('modalVideo');
 
-  // Optional: click outside image to close
-  document.getElementById('imageModal').addEventListener('click', (e) => {
-    if (e.target.id === 'imageModal') {
-      e.currentTarget.classList.add('hidden');
-    }
-  });
+        video.pause();
+        modal.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('mediaModal').addEventListener('click', (e) => {
+        if (e.target.id === 'mediaModal') {
+            document.getElementById('mediaModal').classList.add('hidden');
+            document.getElementById('modalVideo').pause();
+        }
+    });
 </script>
-
 <script>
     const imageInput = document.getElementById('image');
     const preview = document.getElementById('preview');
 
     imageInput.addEventListener('change', (e) => {
         const files = e.target.files;
-        preview.innerHTML = ''; // clear previous images
+        preview.innerHTML = ''; // clear previous
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+        for (let file of files) {
             const reader = new FileReader();
-
             reader.onload = (event) => {
-                const image = document.createElement('img');
-                image.src = event.target.result;
-                image.style.maxWidth = '100px';
-                image.style.maxHeight = '100px';
-                image.classList.add("rounded", "shadow", "mr-2", "mb-2");
-                preview.appendChild(image);
-            };
+                const url = event.target.result;
+                const ext = file.name.split('.').pop().toLowerCase();
 
+                if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.controls = true;
+                    video.classList.add("rounded", "shadow", "mr-2", "mb-2");
+                    video.style.maxWidth = '100px';
+                    video.style.maxHeight = '100px';
+                    preview.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.classList.add("rounded", "shadow", "mr-2", "mb-2");
+                    img.style.maxWidth = '100px';
+                    img.style.maxHeight = '100px';
+                    preview.appendChild(img);
+                }
+            };
             reader.readAsDataURL(file);
         }
     });
+</script>
+
+<script>
+document.querySelector('form').addEventListener('submit', function (e) {
+    const files = document.getElementById('mediaUpload').files;
+    for (let file of files) {
+        if (file.size > 50 * 1024 * 1024) { // 50MB limit
+            alert(`"${file.name}" is too large.`);
+            e.preventDefault();
+            return;
+        }
+    }
+
+    // Show upload message/spinner
+    document.getElementById('uploadMessage').classList.remove('hidden');
+});
 </script>

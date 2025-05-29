@@ -17,8 +17,8 @@
                                 <legend class="block text-xl lg:text-2xl font-medium text-gray-800 mb-4 text-center">Choose where to queue:</legend>
                                 <div class="flex flex-wrap gap-6 justify-center">
                                     @foreach ($queue->windows as $window)
-                                        <div class="flex items-center w-full md:w-1/4">
-                                            <input id="windows_group_{{ $window->id }}" name="window_id" type="radio" value="{{ $window->id }}" class="hidden peer" data-description="{{ $window->description }}" {{ $window->status === 'closed' ? 'disabled' : '' }}>
+                                        <div class="flex items-center w-full md:w-1/4 window-selection-item" data-description="{{ $window->description }}">
+                                            <input id="windows_group_{{ $window->id }}" name="window_id" type="radio" value="{{ $window->id }}" class="hidden peer"  {{ $window->status === 'closed' ? 'disabled' : '' }}>
                                             <label for="windows_group_{{ $window->id }}" 
                                                    class="peer-checked:bg-indigo-100 peer-checked:border-indigo-600 peer-checked:shadow-md transition-all cursor-pointer flex items-center justify-center w-full h-40 px-8 py-6 {{ $window->status === 'closed' ? 'bg-gray-200 border-gray-400 text-gray-500 cursor-not-allowed' : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200' }} text-3xl font-bold rounded-lg">
                                                 {{ $window->name }}
@@ -39,8 +39,8 @@
 
                             <!-- Name Input -->
                             <div>
-                                <label for="name" class="block text-lg font-medium text-gray-800 mb-2">Your Name (Optional)</label>
-                                <input type="text" id="name" name="name" placeholder="e.g., Jane Doe" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
+                                <label for="name" class="block text-lg font-medium text-gray-800 mb-2">Student Name</label>
+                                <input type="text" id="name" name="name" required placeholder="e.g., Mark Vincent" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
                             </div>
 
                             <!-- Submit Button -->
@@ -79,25 +79,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const radioButtons = document.querySelectorAll('input[name="windows_group"]');
+        const $radioButtons =$(".window-selection-item")
         const descriptionDiv = document.getElementById('description');
 
-        // Update description on radio button change
-        radioButtons.forEach(radio => {
-            radio.addEventListener('change', function () {
-                const description = this.getAttribute('data-description');
-                descriptionDiv.innerHTML = `<strong>Description:</strong> ${description || 'No description available.'}`;
-                descriptionDiv.classList.add('bg-indigo-50', 'border-indigo-300');
+        $radioButtons.on('mousedown', function () {
+            const description = this.getAttribute('data-description');
+
+            descriptionDiv.innerHTML = `<strong>Description:</strong> ${description || 'No description available.'}`;
+            descriptionDiv.classList.add('bg-indigo-50', 'border-indigo-300');
+    
+            
+            Echo.channel('live-queue.{{$queue->id}}')
+            .listen('QueueSettingsChanged', () => {
+                
+                //Refresh page just in case admin changes window open/close or other data
+                setTimeout(() => {
+                    location.reload()
+                }, 5000); // 2000ms = 2 seconds
             });
         });
-        
-        Echo.channel('live-queue.{{$queue->id}}')
-      .listen('QueueSettingsChanged', () => {
-          
-          //Refresh page just in case admin changes window open/close or other data
-          setTimeout(() => {
-              location.reload()
-          }, 5000); // 2000ms = 2 seconds
-      });
     });
 </script>

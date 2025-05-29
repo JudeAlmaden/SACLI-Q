@@ -11,37 +11,46 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewTicketEvent implements ShouldBroadcastNow
+class CallingTicket implements ShouldBroadcastNow
 {
-    /**
-     * Create a new event instance.
-     */
-    public $queueId; // Dynamic queue name
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $queueCode; // Dynamic queue name
+    public $ticketNumber; // Ticket number to be called
+    public $windowName; // Window name (optional)
 
     /**
      * Create a new event instance.
      *
      * @param string $queueId
+     * @param int $ticketNumber
+     * @param string $windowName
      */
-    public function __construct($queueId)
+
+
+    public function __construct($queueId, $ticketNumber, $windowName)
     {
-        $this->queueId = $queueId;
+        $this->queueCode = $queueId;
+        $this->ticketNumber = $ticketNumber;
+        $this->windowName = $windowName;
     }
+
 
     /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    //Broadcast an event on a channel
+
     public function broadcastOn()
     {
-        return [new Channel('live-queue.'.$this->queueId)];
+        return [new Channel("live-queue.{$this->queueCode}")];
     }
-
     public function broadcastWith()
     {
         return [
+            'ticketNumber' => $this->ticketNumber,
+            'windowName' => $this->windowName,
         ];
     }
 }
