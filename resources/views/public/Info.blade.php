@@ -91,7 +91,9 @@
 @else
     <div class="mt-6 p-5 bg-white border border-blue-200 rounded-md shadow-sm">
         <h2 class="text-xl font-semibold text-blue-700 text-center mb-2">No Ticket Found</h2>
-        <p class="text-center text-gray-600">The ticket with the provided code does not exist or has already been completed.</p>
+        <p class="text-center text-gray-600">
+            The ticket with the provided code has <strong>already been completed</strong> or <strong>does not exist</strong>.
+        </p>
     </div>
 @endif
 

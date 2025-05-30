@@ -1,7 +1,9 @@
 <x-App>
+  
   <x-slot name="content">
     <div
       class="flex flex-wrap bg-[url('https://th.bing.com/th/id/OIP.CyyzDsXdZ2mk3HbUCv4THQHaEK?rs=1&pid=ImgDetMain')]">
+      
       <div class="w-1/3">
         <div class="grid grid-cols-1 gap-6 p-5 h-full">
           <!-- Window Groups Section -->
@@ -17,7 +19,13 @@
       <div class="w-2/3">
         <x-Carousel :queue="$queue"></x-Carousel>
       </div>
-    </div>
+      
+        <div class="fixed bottom-0 left-0 w-full">
+          <div class="bg-black text-white p-4 text-center">
+            Check your ticket at <a href="{{ route('info') }}" class="text-blue-400 underline hover:text-blue-600 transition">{{ route('info') }}</a> to see your current status.
+          </div>
+        </div>
+      </div>
   </x-slot>
 </x-App>
 
