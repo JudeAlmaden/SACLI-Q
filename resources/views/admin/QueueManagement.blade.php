@@ -134,7 +134,7 @@
                                         <tr>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">User</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Own Window</th>
-                                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Any Any</th>
+                                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Any Window</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Queue</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Clear Queue</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Actions</th>

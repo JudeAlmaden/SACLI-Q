@@ -35,9 +35,6 @@
                 <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th id="sort-completed_tickets-ticket_number" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
-                    Ticket Number <span class="sort-arrow"></span>
-                </th>
                 <th id="sort-completed_tickets-created_at" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Completed At <span class="sort-arrow"></span>
                 </th>
@@ -92,7 +89,6 @@
                             response.tickets.map(ticket =>
                                 `<tr>
                                     <td class="px-6 py-4 text-gray-600">${ticket.code}</td>
-                                    <td class="px-6 py-4 text-gray-600">${ticket.ticket_number}</td>
                                     <td class="px-6 py-4 text-gray-600">${formatDate(ticket.completed_at)}</td>
                                 </tr>`
                             ).join('')
@@ -124,16 +120,6 @@
             toggleSortArrowCompletedTickets($(this), sortOrder);
             getCompletedTickets(completedPage); // Fetch sorted data
         });
-
-        $('#sort-completed_tickets-ticket_number').on('click', function() {
-            // Toggle sorting order
-            sortBy = 'ticket_number';
-            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-            // Toggle arrow classes
-            toggleSortArrowCompletedTickets($(this), sortOrder);
-            getCompletedTickets(completedPage); // Fetch sorted data
-        });
-
         function toggleSortArrowCompletedTickets(element, order) {
             // Reset arrow for all headers
             $('#sort-completed_tickets-created_at').removeClass('sort-asc sort-desc');

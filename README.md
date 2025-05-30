@@ -2,12 +2,11 @@
 Database>seeders>databaseSeeder
 
 # Resets the database
-php artisan db:fresh 
+php artisan db:fresh or
+php artisan migrate:fresh
 
-# Fills database with accounts
+# Fills database with initial data
 php artisan db:seed 
-
-
 
 
 # To start server

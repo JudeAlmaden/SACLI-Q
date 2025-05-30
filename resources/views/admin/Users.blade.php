@@ -79,10 +79,10 @@
                                     <td class="px-6 py-4">{{ ucfirst($user->access_type) }}</td>
                                     <td class="px-6 py-4">
                                         @if ($user->access_type == 'admin')
-                                            <span class="text-gray-500 cursor-not-allowed">Edit</span>
+                                            {{-- <span class="text-gray-500 cursor-not-allowed">Edit</span> --}}
                                             <span class="text-gray-500 cursor-not-allowed ml-4">Delete</span>
                                         @else
-                                            <a href="#" class="text-green-700 hover:text-green-900">Edit</a>
+                                            {{-- <a href="#" class="text-green-700 hover:text-green-900">Edit</a> --}}
                                             <form action="{{ route('user.delete', ['id' => $user->id]) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')

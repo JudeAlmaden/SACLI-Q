@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use App\Models\User;
 
 class MainController extends Controller
@@ -47,9 +48,13 @@ class MainController extends Controller
         // Log out the user
         Auth::logout();
 
-        // Redirect to the login page
+        // Clear all session data
+        Session::flush();
+
+        // Redirect to login/index page with success message
         return redirect()->route('index')->with('success', 'You have been logged out.');
     }
+
 
     //Homepage dashboard
     function dashboard(){

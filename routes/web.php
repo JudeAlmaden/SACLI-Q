@@ -16,7 +16,7 @@ Route::get('/Sacli-Q.com/broadcast', [PublicController::class, 'broadcastEvent']
 Route::post('/Sacli-Q.com/broadcast/callTicket/', [PublicController::class, 'broadcastEventCallTicket'])->name('broadcast.callTicket.event');
 
 // Main routes
-Route::get('/Sacli-Q.com', [MainController::class, 'index'])->name('index'); // Working
+Route::get('/Sacli-Q.com/login', [MainController::class, 'index'])->name('index'); // Working
 Route::get('/Sacli-Q.com/login', [MainController::class, 'index'])->name('index'); // Working
 Route::post('/Sacli-Q.com/login', [MainController::class, 'login'])->name('login');
 Route::get('/Sacli-Q.com/logout', [MainController::class, 'logout'])->name('logout')->middleware(ValidateUser::class);
@@ -62,7 +62,7 @@ Route::get('/Sacli-Q.com/ticketing/success/{id}', [PublicController::class, 'tic
 // API routes
 Route::post('/Sacli-Q.com/api/set-window/{id}', [APIController::class, 'updateWindow'])->name('updateWindowName'); // Update window name
 Route::get('/Sacli-Q.com/api/ticket/current/{window_id}', [APIController::class, 'getCurrentTicketForWindow'])->name('getCurrentTicketData'); // Get current ticket for a window
-Route::get('/Sacli-Q.com/api/ticket/window/{window_id}/', [APIController::class, 'getWindowUserData'])->name('getWindowUserData'); // Get all tickets for a window group
+Route::get('/Sacli-Q.com/api/ticket/window/{window_id}/{user_id}', [APIController::class, 'getWindowUserData'])->name('getWindowUserData'); // Get all tickets for a window group
 
 Route::get('/Sacli-Q.com/api/ticket/next/{window_id}', [APIController::class, 'getNextTicketForWindow'])->name('getNextTicketForWindow'); // Get next ticket for a window
 Route::get('/Sacli-Q.com/api/ticket/complete/{window_id}', [APIController::class, 'setToComplete'])->name('setToComplete'); // Set ticket to complete

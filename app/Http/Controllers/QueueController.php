@@ -252,7 +252,7 @@ class QueueController extends Controller
             return redirect()->route('myQueues')->with('error', 'You do not have access to this window.');
         }else{
             // Pass the fetched data to the view
-            return view('user.QueuingDashboard', compact('windowAccess', 'window'));
+            return view('user.QueuingDashboard', compact('windowAccess', 'window', 'user_id'));
         }
     }
 
@@ -330,7 +330,6 @@ class QueueController extends Controller
             return response()->json(['success' => false, 'message' => 'You do not have the required privileges to perform this action.'], 403);
         }
 
-    
         if (!$queue->tickets()->exists()) {
             return response()->json(['success' => true, 'message' => 'No tickets found.']);
         }

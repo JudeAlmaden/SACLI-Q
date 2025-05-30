@@ -27,6 +27,7 @@ class APIController extends Controller
         $windows = $queue->Windows->map(function ($Window) {
             $Window->issuedTickets = Ticket::where('window_id', $Window->id)
                 ->where('status', 'Calling')
+                ->whereDate('created_at', Carbon::today()) 
                 ->with('user')
                 ->get();
     
@@ -114,6 +115,7 @@ class APIController extends Controller
        $onCall = Ticket::where('window_id', $WindowId)
            ->where('handled_by', $user_id)
            ->where('status', 'Calling')
+           ->whereDate('created_at', Carbon::today()) 
            ->first();
 
        if ($onCall) {
@@ -304,13 +306,17 @@ class APIController extends Controller
     }
 
     //get data for a user window such as number of upcoming tickets
-    public function getWindowUserData($WindowId){
+    public function getWindowUserData($WindowId, $userId){
         $upcomingTicketsCount = Ticket::where('window_id', $WindowId)
                                         ->where('status', 'Waiting')
                                         ->whereDate('created_at', Carbon::today()) 
                                         ->count();
-    
-        return response()->json(['success' => true, 'upcoming_tickets_count' => $upcomingTicketsCount]);
+        $completedTickets = Ticket::where('window_id', $WindowId)
+                                        ->where('handled_by', $userId)
+                                        ->where('status', 'Completed')
+                                        ->whereDate('created_at', Carbon::today()) 
+                                        ->count();
+        return response()->json(['success' => true, 'upcoming_tickets_count' => $upcomingTicketsCount, 'completed_tickets_count' => $completedTickets]);
     }
 
 

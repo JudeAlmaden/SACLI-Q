@@ -52,9 +52,6 @@
                 <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th id="sort-ticket_number-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
-                    Ticket Number <span class="sort-arrow"></span>
-                </th>
                 <th id="sort-created_at-upcoming_ticket" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Created At <span class="sort-arrow"></span>
                 </th>
@@ -113,7 +110,6 @@
                         response.tickets.map(ticket =>
                             `<tr>
                                 <td class="px-6 py-4 text-gray-600">${ticket.code}</td>
-                                <td class="px-6 py-4 text-gray-600">${ticket.ticket_number}</td>
                                 <td class="px-6 py-4 text-gray-600">${formatDate(ticket.created_at)}</td>
                                 <td class="px-6 py-4 text-gray-600 text-center">
                                     <button 
@@ -149,15 +145,6 @@
     $('#sort-created_at-upcoming_ticket').on('click', function() {
         // Toggle sorting order
         sortByUpcomingTickets = 'completed_at';
-        sortOrderUpcomingTickets = (sortOrderUpcomingTickets === 'asc') ? 'desc' : 'asc';
-        // Toggle arrow classes
-        toggleSortArrowUpcomingTickets($(this), sortOrderUpcomingTickets);
-        getCompletedTickets(upcomingTicketsPage); // Fetch sorted data
-    });
-
-    $('#sort-ticket_number-upcoming_ticket').on('click', function() {
-        // Toggle sorting order
-        sortByUpcomingTickets = 'ticket_number';
         sortOrderUpcomingTickets = (sortOrderUpcomingTickets === 'asc') ? 'desc' : 'asc';
         // Toggle arrow classes
         toggleSortArrowUpcomingTickets($(this), sortOrderUpcomingTickets);

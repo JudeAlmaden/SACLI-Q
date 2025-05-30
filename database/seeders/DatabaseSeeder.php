@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'account_id' => '0000-0001',
             'access_type' => 'admin',
-            'password' => bcrypt('Password'),
+            'password' => bcrypt('pXajsdua132'),
         ]);
 
         // Create Main Building Queue
@@ -59,27 +59,28 @@ class DatabaseSeeder extends Seeder
                 'status' => 'open',
             ]);
 
+            //Uncomment the following lines to seed the windows with tickets for testing purposes
             // Generate 10 tickets for today
-            for ($i = 1; $i <= 10; $i++) {
-                // Generate 4-digit padded code
-                $code = str_pad($ticketNumber, 4, '0', STR_PAD_LEFT);
+            // for ($i = 1; $i <= 10; $i++) {
+            //     // Generate 4-digit padded code
+            //     $code = str_pad($ticketNumber, 4, '0', STR_PAD_LEFT);
 
-                // Add a few seconds to each ticket's timestamp to make them unique
-                $createdAt = Carbon::today()->addSeconds($ticketNumber * 10);
+            //     // Add a few seconds to each ticket's timestamp to make them unique
+            //     $createdAt = Carbon::today()->addSeconds($ticketNumber * 10);
 
-                Ticket::create([
-                    'queue_id' => $queue->id,
-                    'window_id' => $window->id,
-                    'name' => 'User ' . $i,
-                    'status' => 'Waiting',
-                    'ticket_number' => $i,
-                    'code' => $code,
-                    'created_at' => $createdAt,
-                    'updated_at' => $createdAt,
-                ]);
+            //     Ticket::create([
+            //         'queue_id' => $queue->id,
+            //         'window_id' => $window->id,
+            //         'name' => 'User ' . $i,
+            //         'status' => 'Waiting',
+            //         'ticket_number' => $i,
+            //         'code' => $code,
+            //         'created_at' => $createdAt,
+            //         'updated_at' => $createdAt,
+            //     ]);
 
-                $ticketNumber++;
-            }
+            //     $ticketNumber++;
+            // }
         }
     }
 }

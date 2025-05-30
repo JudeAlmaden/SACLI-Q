@@ -51,6 +51,7 @@
                     <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
                         <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
                             <h2 class="text-xl font-bold mb-2">Number of tickets left: <span id="upcoming-tickets-count" class="text-2xl font-semibold"></span></h2>
+                              <h2 class="text-xl font-bold mb-2">Number of tickets handled: <span id="completed-tickets-count" class="text-2xl font-semibold"></span></h2>
                         </div>
                     </section>
                 </div>
@@ -333,11 +334,12 @@ $(document).ready(function() {
 
     function getWindowUserData() {
         $.ajax({
-            url: "{{ route('getWindowUserData', ['window_id' => $window->id]) }}",
+            url: "{{ route('getWindowUserData', ['window_id' => $window->id, 'user_id'=>$user_id ]) }}",
             method: 'GET',
             success: function(response) {
                 if (response.success) {
                     $('#upcoming-tickets-count').text(response.upcoming_tickets_count);
+                    $('#completed-tickets-count').text(response.completed_tickets_count);
                 } else {
                     alert(response.message);
                 }
