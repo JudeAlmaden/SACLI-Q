@@ -256,9 +256,9 @@
                             @endphp
 
                             @if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                                <img src="{{ $fullPath }}" data-full="{{ $fullPath }}" class="thumbnail rounded shadow cursor-pointer" style="max-width: 100px; max-height: 100px;" />
+                                <img src="{{ $fullPath }}" data-full="{{ $fullPath }}" class="thumbnail rounded shadow cursor-pointer" style="max-width: 200px; max-height: 200px;" />
                             @elseif (in_array(strtolower($ext), ['mp4', 'webm', 'ogg']))
-                                <video src="{{ $fullPath }}" controls data-full="{{ $fullPath }}" class="rounded shadow cursor-pointer" style="max-width: 100px; max-height: 100px;"></video>
+                                <video src="{{ $fullPath }}" controls data-full="{{ $fullPath }}" class="rounded shadow cursor-pointer" style="max-width: 200px; max-height: 200px;"></video>
                             @endif
                         @endforeach
                     </div>
@@ -368,11 +368,11 @@
                     if (['mp4', 'webm', 'ogg'].includes(ext)) {
                         $el = $('<video controls>').attr('src', url)
                             .addClass('rounded shadow cursor-pointer')
-                            .css({ maxWidth: '100px', maxHeight: '100px' });
+                            .css({ maxWidth: '200px', maxHeight: '200px' });
                     } else {
                         $el = $('<img>').attr('src', url)
                             .addClass('rounded shadow cursor-pointer thumbnail')
-                            .css({ maxWidth: '100px', maxHeight: '100px' });
+                            .css({ maxWidth: '200px', maxHeight: '200px' });
                     }
                     $preview.append($el);
                 };
@@ -411,13 +411,13 @@
                             $el = $('<img>').attr('src', path)
                                 .attr('data-full', path)
                                 .addClass('rounded shadow cursor-pointer thumbnail')
-                                .css({ maxWidth: '100px', maxHeight: '100px' });
+                                .css({ maxWidth: '200px', maxHeight: '200px' });
                         } else if (['mp4', 'webm', 'ogg'].includes(ext)) {
                             $el = $('<video controls>')
                                 .attr('src', path)
                                 .attr('data-full', path)
                                 .addClass('rounded shadow cursor-pointer')
-                                .css({ maxWidth: '100px', maxHeight: '100px' });
+                                .css({ maxWidth: '200px', maxHeight: '200px' });
                         }
                         if ($el) $preview.append($el);
                     });
