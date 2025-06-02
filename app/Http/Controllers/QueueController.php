@@ -88,7 +88,6 @@ class QueueController extends Controller
         return view('admin.QueueManagement', compact('queue', 'uniqueUsers', 'accessList', 'userWindows'));
     }
 
-
     public function updateMediaAds(Request $request, $id)
     {
         $queue = Queue::findOrFail($id);
@@ -106,19 +105,35 @@ class QueueController extends Controller
         // Handle new uploads (images and videos)
         $files = $request->file('File');
         $storedMedia = [];
+        $mediaUrls = [];
 
         if ($files && is_array($files)) {
             foreach ($files as $file) {
-                // Optionally, you can validate file type here
                 $path = $file->store('media', 'public');
                 $storedMedia[] = $path;
+                $mediaUrls[] = Storage::url($path);
             }
         }
 
         $queue->media_advertisement = json_encode($storedMedia);
         $queue->save();
 
-        return back()->with('success', 'Media files uploaded successfully.');
+        if ($request->expectsJson() || $request->wantsJson()) {
+            if (empty($storedMedia)) {
+                return response()->json(['success' => false, 'message' => 'No media files were uploaded.']);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Media files uploaded and updated successfully.',
+                'media_urls' => $mediaUrls
+            ]);
+        }
+
+        // Fallback: redirect with session message if not expecting JSON
+        if (empty($storedMedia)) {
+            return redirect()->back()->with('error', 'No media files were uploaded.');
+        }
+        return redirect()->back()->with('success', 'Media files uploaded and updated successfully.');
     }
 
 

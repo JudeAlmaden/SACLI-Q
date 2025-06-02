@@ -98,8 +98,52 @@
                         </div>
                     </div>
                 </div>
-                
-                
+                {{-- Copy Links --}}
+                <script>
+                    $(document).ready(function () {
+                        $('.copyButton').on('click', function () {
+                            const textToCopy = $(this).data('copy');
+                            const $statusMessage = $(this).closest('.relative').find('.statusMessage');
+
+                            if ($statusMessage.length) {
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(textToCopy).then(() => {
+                                        $statusMessage.removeClass('opacity-0').show();
+
+                                        setTimeout(() => {
+                                            $statusMessage.fadeOut(1000, function () {
+                                                $(this).addClass('opacity-0').hide();
+                                            });
+                                        }, 2000);
+                                    }).catch(err => {
+                                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
+                                        console.error('Copy failed:', err);
+                                    });
+                                } else {
+                                    // Fallback for browsers that do not support navigator.clipboard
+                                    const tempInput = document.createElement('input');
+                                    tempInput.value = textToCopy;
+                                    document.body.appendChild(tempInput);
+                                    tempInput.select();
+                                    try {
+                                        document.execCommand('copy');
+                                        $statusMessage.removeClass('opacity-0').show();
+                                        setTimeout(() => {
+                                            $statusMessage.fadeOut(1000, function () {
+                                                $(this).addClass('opacity-0').hide();
+                                            });
+                                        }, 2000);
+                                    } catch (err) {
+                                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
+                                        console.error('Copy failed:', err);
+                                    }
+                                    document.body.removeChild(tempInput);
+                                }
+                            }
+                        });
+                    });
+                </script>
+                                
                 <!-- Modal -->
                 <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
                     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -178,289 +222,213 @@
                     </div>
                 </div>
 
-                {{-- Ads --}}
+                <!-- Upload Section -->
                 <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-3xl mx-auto">
                     <h2 class="text-2xl font-semibold text-gray-900 mb-1">Advertisement</h2>
                     <p class="text-sm text-gray-500 mb-4">You can place your ad content here.</p>
 
-                    <form action="{{ route('queue.advertisement', ['id' => $queue->id]) }}" method="POST" enctype="multipart/form-data" class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col gap-4">
-                        @csrf
+                    @csrf
 
-                        <div id="uploadMessage" class="hidden flex items-center justify-center mt-4 text-gray-700">
-                                <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                                </svg>
-                                Uploading files, please wait...
-                        </div>
-                        <!-- File Input -->
-                        <div class="flex justify-center">
-                            <label for="image" class="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-800">
-                                <span class="material-symbols-outlined text-2xl">Files</span>
-                                <span>Select Files</span>
-                            </label>
-                            <input type="file" id="image" name="File[]" accept="image/*,video/*" multiple class="hidden">
-                        </div>
+                    <div id="uploadMessage" class="hidden flex items-center justify-center mt-4 text-gray-700">
+                        <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Uploading files, please wait...
+                    </div>
 
-                        <!-- Preview Area -->
-                        <div id="preview" class="flex flex-wrap gap-3 justify-center">
+                    <div class="flex justify-center">
+                        <label for="image" class="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-12">
+                            <span class="material-symbols-outlined text-2xl">Files</span>
+                            <span>Select Files</span>
+                        </label>
+                        <input type="file" id="image" name="File[]" accept="image/*,video/*" multiple class="hidden">
+                    </div>
+
+                    <div id="preview" class="flex flex-wrap gap-3 justify-center">
+                        @php
+                            $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
+                        @endphp
+                        @foreach ($mediaAds as $mediaPath)
                             @php
-                                $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
+                                $fullPath = asset('storage/' . $mediaPath);
+                                $ext = pathinfo($mediaPath, PATHINFO_EXTENSION);
                             @endphp
-                            @if (!empty($mediaAds))
-                                @foreach ($mediaAds as $mediaPath)
-                                    @php
-                                        $fullPath = asset('storage/' . $mediaPath);
-                                        $extension = pathinfo($mediaPath, PATHINFO_EXTENSION);
-                                    @endphp
 
-                                    @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                                        <img 
-                                            src="{{ $fullPath }}"  
-                                            data-full="{{ $fullPath }}"
-                                            class="thumbnail rounded shadow cursor-pointer" 
-                                            style="max-width: 100px; max-height: 100px;"
-                                        />
-                                    @elseif (in_array(strtolower($extension), ['mp4', 'webm', 'ogg']))
-                                        <video 
-                                            src="{{ $fullPath }}" 
-                                            controls 
-                                            class="rounded shadow cursor-pointer"
-                                            style="max-width: 100px; max-height: 100px;"
-                                        >
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    @endif
-                                @endforeach
+                            @if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                                <img src="{{ $fullPath }}" data-full="{{ $fullPath }}" class="thumbnail rounded shadow cursor-pointer" style="max-width: 100px; max-height: 100px;" />
+                            @elseif (in_array(strtolower($ext), ['mp4', 'webm', 'ogg']))
+                                <video src="{{ $fullPath }}" controls data-full="{{ $fullPath }}" class="rounded shadow cursor-pointer" style="max-width: 100px; max-height: 100px;"></video>
                             @endif
-                        </div>
-
-
-                        <!-- Submit -->
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-6 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition">Change</button>
-                        </div>
-                    </form>
+                        @endforeach
+                    </div>
                 </div>
 
-                {{-- Unified Media Modal --}}
+                <!-- Modal Viewer -->
                 <div id="mediaModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
                     <div class="relative max-w-[90%] max-h-[90%]">
                         <button id="closeModal" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
-
-                        {{-- Image Viewer --}}
                         <img id="modalImage" src="" class="max-w-screen max-h-screen rounded shadow-xl hidden" />
-
-                        {{-- Video Viewer --}}
                         <video id="modalVideo" controls class="max-w-screen max-h-screen rounded shadow-xl hidden">
                             <source id="modalVideoSource" src="" type="video/mp4" />
                             Your browser does not support the video tag.
                         </video>
                     </div>
                 </div>
-
                 </div>
-
             </div>
         </div>
     </x-slot>
 </x-Dashboard>
 
-{{--This just turns on the modal or something  --}}
+
 <script>
+    // Modal toggle for Add New Window Group
     function toggleModal(show) {
-        document.getElementById('modal').classList.toggle('hidden', !show);
+        $('#modal').toggleClass('hidden', !show);
     }
-</script>
-                
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.update-access').forEach(button => {
-            button.addEventListener('click', function () {
-                const userId = this.getAttribute('data-user-id');
-                const queueId = this.getAttribute('data-queue-id');
-                const canCloseOwnWindow = document.querySelector(`input[data-id="${userId}"][data-field="can_close_own_window"]`).checked;
-                const canCloseAnyWindow = document.querySelector(`input[data-id="${userId}"][data-field="can_close_any_window"]`).checked;
-                const canCloseQueue = document.querySelector(`input[data-id="${userId}"][data-field="can_close_queue"]`).checked;
-                const canClearQueue = document.querySelector(`input[data-id="${userId}"][data-field="can_clear_queue"]`).checked;
+    $(function () {
+        // Update Access AJAX
+        $('.update-access').on('click', function () {
+            const userId = $(this).data('user-id');
+            const queueId = $(this).data('queue-id');
+            const canCloseOwnWindow = $(`input[data-id="${userId}"][data-field="can_close_own_window"]`).prop('checked');
+            const canCloseAnyWindow = $(`input[data-id="${userId}"][data-field="can_close_any_window"]`).prop('checked');
+            const canCloseQueue = $(`input[data-id="${userId}"][data-field="can_close_queue"]`).prop('checked');
+            const canClearQueue = $(`input[data-id="${userId}"][data-field="can_clear_queue"]`).prop('checked');
 
-                fetch("{{ route('update-access', ['user_id' => '__userId__', 'queue_id' => '__queueId__']) }}".replace('__userId__', userId).replace('__queueId__', queueId), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        can_close_own_window: canCloseOwnWindow,
-                        can_close_any_window: canCloseAnyWindow,
-                        can_close_queue: canCloseQueue,
-                        can_clear_queue: canClearQueue
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Access privileges updated successfully.');
-                    } else {
-                        alert('Failed to update access privileges.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+            $.ajax({
+                url: "{{ route('update-access', ['user_id' => '__userId__', 'queue_id' => '__queueId__']) }}"
+                    .replace('__userId__', userId).replace('__queueId__', queueId),
+                method: 'POST',
+                contentType: 'application/json',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                data: JSON.stringify({
+                    can_close_own_window: canCloseOwnWindow,
+                    can_close_any_window: canCloseAnyWindow,
+                    can_close_queue: canCloseQueue,
+                    can_clear_queue: canClearQueue
+                }),
+                success: function (data) {
+                    alert(data.success ? 'Access privileges updated successfully.' : 'Failed to update access privileges.');
+                },
+                error: function () {
                     alert('An error occurred while updating access privileges.');
-                });
+                }
+            });
+        });
+
+        // Media Modal Preview
+        $('#preview').on('click', '.thumbnail, video', function () {
+            const fullPath = $(this).data('full') || $(this).attr('src');
+            const isVideo = /\.(mp4|webm|ogg)$/i.test(fullPath);
+
+            $('#mediaModal').removeClass('hidden');
+            if (isVideo) {
+                $('#modalImage').addClass('hidden').attr('src', '');
+                $('#modalVideoSource').attr('src', fullPath);
+                $('#modalVideo').removeClass('hidden')[0].load();
+            } else {
+                $('#modalVideo').addClass('hidden')[0].pause();
+                $('#modalVideoSource').attr('src', '');
+                $('#modalImage').attr('src', fullPath).removeClass('hidden');
+            }
+        });
+
+        // Close media modal
+        $('#closeModal').on('click', function () {
+            $('#mediaModal').addClass('hidden');
+            $('#modalVideo')[0].pause();
+        });
+        $('#mediaModal').on('click', function (e) {
+            if (e.target.id === 'mediaModal') {
+                $(this).addClass('hidden');
+                $('#modalVideo')[0].pause();
+            }
+        });
+
+        // File input preview and upload
+        const $fileInput = $('#image');
+        const $uploadMessage = $('#uploadMessage');
+        const $preview = $('#preview');
+
+        $fileInput.on('change', function () {
+            const files = this.files;
+            if (!files.length) return;
+
+            // Preview selected files
+            $preview.empty();
+            $.each(files, function (i, file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const url = e.target.result;
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    let $el;
+                    if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                        $el = $('<video controls>').attr('src', url)
+                            .addClass('rounded shadow cursor-pointer')
+                            .css({ maxWidth: '100px', maxHeight: '100px' });
+                    } else {
+                        $el = $('<img>').attr('src', url)
+                            .addClass('rounded shadow cursor-pointer thumbnail')
+                            .css({ maxWidth: '100px', maxHeight: '100px' });
+                    }
+                    $preview.append($el);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Upload files via AJAX
+            $uploadMessage.removeClass('hidden');
+            const formData = new FormData();
+            $.each(files, function (i, file) {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert(`"${file.name}" is too large.`);
+                    $uploadMessage.addClass('hidden');
+                    return false;
+                }
+                formData.append('File[]', file);
+            });
+            formData.append('_token', '{{ csrf_token() }}');
+
+            $.ajax({
+                url: "{{ route('queue.advertisement', ['id' => $queue->id]) }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (!data.success) {
+                        alert(data.message || 'Upload failed.');
+                        return;
+                    }
+                    $preview.empty();
+                    $.each(data.media_urls || [], function (i, path) {
+                        const ext = path.split('.').pop().toLowerCase();
+                        let $el;
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                            $el = $('<img>').attr('src', path)
+                                .attr('data-full', path)
+                                .addClass('rounded shadow cursor-pointer thumbnail')
+                                .css({ maxWidth: '100px', maxHeight: '100px' });
+                        } else if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                            $el = $('<video controls>')
+                                .attr('src', path)
+                                .attr('data-full', path)
+                                .addClass('rounded shadow cursor-pointer')
+                                .css({ maxWidth: '100px', maxHeight: '100px' });
+                        }
+                        if ($el) $preview.append($el);
+                    });
+                },
+                error: function () {
+                    alert("Error uploading files. Please try again.");
+                },
+                complete: function () {
+                    $uploadMessage.addClass('hidden');
+                }
             });
         });
     });
-</script>
-
-{{-- Copy Links --}}
-<script>
-    $(document).ready(function () {
-        $('.copyButton').on('click', function () {
-            const textToCopy = $(this).data('copy');
-            const $statusMessage = $(this).closest('.relative').find('.statusMessage');
-
-            if ($statusMessage.length) {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        $statusMessage.removeClass('opacity-0').show();
-
-                        setTimeout(() => {
-                            $statusMessage.fadeOut(1000, function () {
-                                $(this).addClass('opacity-0').hide();
-                            });
-                        }, 2000);
-                    }).catch(err => {
-                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
-                        console.error('Copy failed:', err);
-                    });
-                } else {
-                    // Fallback for browsers that do not support navigator.clipboard
-                    const tempInput = document.createElement('input');
-                    tempInput.value = textToCopy;
-                    document.body.appendChild(tempInput);
-                    tempInput.select();
-                    try {
-                        document.execCommand('copy');
-                        $statusMessage.removeClass('opacity-0').show();
-                        setTimeout(() => {
-                            $statusMessage.fadeOut(1000, function () {
-                                $(this).addClass('opacity-0').hide();
-                            });
-                        }, 2000);
-                    } catch (err) {
-                        $statusMessage.text('Failed to copy text.').css('color', 'red').show();
-                        console.error('Copy failed:', err);
-                    }
-                    document.body.removeChild(tempInput);
-                }
-            }
-        });
-    });
-</script>
-
-
-{{-- Media Preview Functions --}}
-<script>
-    // Open modal with either image or video
-    document.querySelectorAll('.thumbnail').forEach(el => {
-        el.addEventListener('click', () => {
-            const fullPath = el.dataset.full;
-            const isVideo = fullPath.match(/\.(mp4|webm|ogg)$/i);
-
-            const modal = document.getElementById('mediaModal');
-            const modalImage = document.getElementById('modalImage');
-            const modalVideo = document.getElementById('modalVideo');
-            const modalVideoSource = document.getElementById('modalVideoSource');
-
-            if (isVideo) {
-                modalImage.classList.add('hidden');
-                modalImage.src = '';
-
-                modalVideoSource.src = fullPath;
-                modalVideo.load();
-                modalVideo.classList.remove('hidden');
-            } else {
-                modalVideo.pause();
-                modalVideo.classList.add('hidden');
-                modalVideoSource.src = '';
-
-                modalImage.src = fullPath;
-                modalImage.classList.remove('hidden');
-            }
-
-            modal.classList.remove('hidden');
-        });
-    });
-
-    // Close modal logic
-    const closeModal = document.getElementById('closeModal');
-    closeModal.addEventListener('click', () => {
-        const modal = document.getElementById('mediaModal');
-        const video = document.getElementById('modalVideo');
-
-        video.pause();
-        modal.classList.add('hidden');
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('mediaModal').addEventListener('click', (e) => {
-        if (e.target.id === 'mediaModal') {
-            document.getElementById('mediaModal').classList.add('hidden');
-            document.getElementById('modalVideo').pause();
-        }
-    });
-</script>
-<script>
-    const imageInput = document.getElementById('image');
-    const preview = document.getElementById('preview');
-
-    imageInput.addEventListener('change', (e) => {
-        const files = e.target.files;
-        preview.innerHTML = ''; // clear previous
-
-        for (let file of files) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const url = event.target.result;
-                const ext = file.name.split('.').pop().toLowerCase();
-
-                if (['mp4', 'webm', 'ogg'].includes(ext)) {
-                    const video = document.createElement('video');
-                    video.src = url;
-                    video.controls = true;
-                    video.classList.add("rounded", "shadow", "mr-2", "mb-2");
-                    video.style.maxWidth = '100px';
-                    video.style.maxHeight = '100px';
-                    preview.appendChild(video);
-                } else {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.classList.add("rounded", "shadow", "mr-2", "mb-2");
-                    img.style.maxWidth = '100px';
-                    img.style.maxHeight = '100px';
-                    preview.appendChild(img);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-
-<script>
-document.querySelector('form').addEventListener('submit', function (e) {
-    const files = document.getElementById('mediaUpload').files;
-    for (let file of files) {
-        if (file.size > 50 * 1024 * 1024) { // 50MB limit
-            alert(`"${file.name}" is too large.`);
-            e.preventDefault();
-            return;
-        }
-    }
-
-    // Show upload message/spinner
-    document.getElementById('uploadMessage').classList.remove('hidden');
-});
 </script>
