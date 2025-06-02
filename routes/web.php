@@ -25,6 +25,7 @@ Route::get('/Sacli-Q.com/logout', [MainController::class, 'logout'])->name('logo
 Route::get('/Sacli-Q.com/dashboard', [MainController::class, 'dashboard'])->name('dashboard')->middleware(ValidateUser::class);
 Route::get('/Sacli-Q.com/users', [MainController::class, 'users'])->name('user.list')->middleware(IsAdmin::class);
 Route::post('/Sacli-Q.com/create-account', [MainController::class, 'createAccount'])->name('user.save')->middleware(IsAdmin::class);
+Route::post('/Sacli-Q.com/edit-account', [MainController::class, 'editAccount'])->name('user.edit')->middleware(IsAdmin::class);
 Route::delete('/Sacli-Q.com/delete-account/{id}', [MainController::class, 'deleteAccount'])->name('user.delete')->middleware(IsAdmin::class);
 
 // Managing queues (Admin)

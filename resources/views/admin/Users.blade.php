@@ -33,7 +33,7 @@
                         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h1 class="text-xl font-semibold text-gray-900">Create New User</h1>
-                                <form id="createUserForm" class="mt-4" action="{{ route('user.save') }}" method="POST">
+                                <form id="createUserForm" class="mt-4" action="{{ route('user.edit') }}" method="POST">
                                     @csrf
                                     <div class="mb-4">
                                         <label for="name" class="block text-sm font-medium text-gray-700">Employee Name</label>
@@ -78,17 +78,21 @@
                                     <td class="px-6 py-4">{{ $user->account_id }}</td>
                                     <td class="px-6 py-4">{{ ucfirst($user->access_type) }}</td>
                                     <td class="px-6 py-4">
+                                        <button type="button"
+                                            onclick="openEditUserModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->account_id) }}', '{{ $user->access_type }}')"
+                                            class="text-green-700 hover:text-green-900">
+                                            Edit
+                                        </button>
                                         @if ($user->access_type == 'admin')
-                                            {{-- <span class="text-gray-500 cursor-not-allowed">Edit</span> --}}
                                             <span class="text-gray-500 cursor-not-allowed ml-4">Delete</span>
                                         @else
-                                            {{-- <a href="#" class="text-green-700 hover:text-green-900">Edit</a> --}}
                                             <form action="{{ route('user.delete', ['id' => $user->id]) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 ml-4">Delete</button>
                                             </form>
                                         @endif
+                                    </td>
                                     </td>
                                 </tr>
                             @endforeach
@@ -97,6 +101,45 @@
                 </div>
                 <div class="mt-4">
                     {{ $users->links() }}
+                </div>
+                <!-- Edit Modal -->
+                <div id="editUserModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+                    <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 transition-opacity">
+                            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                        </div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <h1 class="text-xl font-semibold text-gray-900">Edit User</h1>
+                                <form id="editUserForm" method="POST" action="{{ route('user.edit') }}">
+
+                                    @csrf
+                                    <input type="hidden" id="edit_user_id" name="user_id">
+                                    <div class="mb-4">
+                                        <label for="edit_name" class="block text-sm font-medium text-gray-700">Employee Name</label>
+                                        <input readonly type="text" id="edit_name" name="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="edit_account_id" class="block text-sm font-medium text-gray-700">Account ID</label>
+                                        <input readonly type="text" id="edit_account_id" name="account_id" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="edit_password" class="block text-sm font-medium text-gray-700">New Password</label>
+                                        <input type="password" id="edit_password" name="password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" placeholder="New password">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="edit_password_confirmation" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                        <input type="password" id="edit_password_confirmation" name="password_confirmation" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" placeholder="Confirm New Password">
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 mr-2">Cancel</button>
+                                        <button type="submit" class="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800">Update User</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>         
@@ -111,4 +154,26 @@
     document.getElementById('closeModalButton').addEventListener('click', function() {
         document.getElementById('createUserModal').classList.add('hidden');
     });
+
+    document.getElementById('toggleModalButton').addEventListener('click', function () {
+        document.getElementById('createUserModal').classList.remove('hidden');
+    });
+
+    document.getElementById('closeModalButton').addEventListener('click', function () {
+        document.getElementById('createUserModal').classList.add('hidden');
+    });
+
+    function openEditUserModal(id, name, account_id, access_type) {
+        // Fill form fields
+        document.getElementById('edit_user_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_account_id').value = account_id;
+
+        // Show modal
+        document.getElementById('editUserModal').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('editUserModal').classList.add('hidden');
+    }
 </script>

@@ -84,7 +84,6 @@ class MainController extends Controller
             'password_confirmation' => 'required|same:password',
         ]);
 
-        //Create a new user and save to the database.
         $user = new User();
         $user->name = $request->name;
         $user->account_id = $request->account_id;
@@ -99,7 +98,26 @@ class MainController extends Controller
             ])->withInput($request->only('account_id', 'name'));
         }
      }
+    function editAccount(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'password' => 'required|min:8|confirmed',
+            'password_confirmation' => 'required|same:password',
+        ]);
 
+        $user = User::findOrFail($request->user_id);
+        $user->password = bcrypt($request->password);
+        $success = $user->save();
+
+        if ($success) {
+            return redirect()->back()->with('success', 'Password updated successfully.');
+        } else {
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to update the password.',
+            ]);
+        }
+    }
     function deleteAccount($id)
     {
         $user = User::findOrFail($id);
