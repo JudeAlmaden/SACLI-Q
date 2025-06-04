@@ -1,6 +1,6 @@
 @props(['queue'])
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-    <div class="relative flex flex-col h-full p-4 border-b border-green-300 bg-white rounded-lg shadow">
+    <div class="relative flex flex-col h-full p-4 border border-gray-300 bg-white rounded-lg shadow">
         <div class="flex items-center gap-2 mb-2">
             <h1 class="text-green-700">URL for live view:</h1>
         </div>
@@ -10,7 +10,7 @@
                 {{ route('liveQueue', ['code' => $queue->code]) }}
             </span>
             <button data-copy="{{ route('liveQueue', ['code' => $queue->code]) }}"
-                class="copyButton flex items-center px-2 py-2 bg-green-500 text-white hover:bg-green-600 rounded-md border border-green-600 transition-colors"
+                class="copyButton flex items-center px-2 py-2 bg-green-500 text-white hover:bg-green-600 rounded-md border border-green-500 transition-colors"
                 aria-label="Copy to clipboard">
                 <!-- Copy Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="relative flex flex-col h-full p-4 border-b border-green-300 bg-white rounded-lg shadow">
+    <div class="relative flex flex-col h-full p-4 border-b border-gray-300 bg-white rounded-lg shadow">
         <div class="flex items-center gap-2 mb-2">
             <h1 class="text-green-700">URL for ticketing:</h1>
         </div>
