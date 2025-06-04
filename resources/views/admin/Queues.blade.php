@@ -18,41 +18,13 @@
                             <button type="submit" class="ml-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Search</button>
                         </div>
                     </form>
-                    <button id="toggleModalButton" class="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <button id="toggleCreateQueue" onclick="toggleModal('createQueue')" class="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                         <i class="fas fa-plus mr-2"></i>
                         Create New Queue
                     </button>
                 </div>
 
                 <hr>
-                
-                <div id="createQueueModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-                    <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
-                        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                        </div>
-                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                <h1 class="text-xl font-semibold text-gray-900">Create New Queue</h1>
-                                <form id="createQueueForm" class="mt-4" action="{{ route('admin.queue.create') }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label for="name" class="block text-sm font-medium text-gray-700">Queue Name</label>
-                                        <input required type="text" id="name" name="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
-                                        @error('name')
-                                            <div class="mt-2 text-sm text-red-500">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="flex justify-end mt-6">
-                                        <button type="button" id="closeModalButton" class="w-1/2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-2">Cancel</button>
-                                        <button type="submit" class="w-1/2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Create Queue</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="mt-8 relative overflow-x-auto shadow-md sm:rounded-lg">
                     <table class="w-full text-sm text-left text-gray-500">
@@ -75,13 +47,9 @@
                                         </a>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <form action="{{ route('admin.queue.delete', ['id' => $queue->id]) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
-                                                <i class="fas fa-trash-alt mr-2"></i> Delete
-                                            </button>
-                                        </form>
+                                        <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
+                                                <button onclick="deleteQueueModal({{ $queue->id }})" class="text-red-600 hover:text-red-900 ml-4">Delete</button>
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -92,16 +60,52 @@
                     {{ $queues->links() }}
                 </div>
             </div>
-        </div>         
+        </div> 
+
+        {{-- Create Modal --}}
+        <x-modal id="createQueue" title="Create new Queue">
+            <form id="createQueueForm" class="mt-4" action="{{ route('admin.queue.create') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700">Queue Name</label>
+                    <input required type="text" id="name" name="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+                    @error('name')
+                        <div class="mt-2 text-sm text-red-500">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" onclick="toggleModal('createQueue')" class="w-1/2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-2">Cancel</button>
+                    <button type="submit" class="w-1/2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Create Queue</button>
+                </div>
+            </form>
+        </x-modal>
+
+        
+        {{-- Delete Modal --}}
+        <x-modal id="deleteQueueModal" title="Confirm Delete">
+            <form id="deleteQueueForm" method="POST">
+                @csrf
+                @method('DELETE')
+                <p class="text-sm text-gray-500 mb-4">Are you sure you want to delete this queue? This action cannot be undone.</p>
+                <div class="flex justify-end">
+                    <button type="button" onclick="toggleModal('deleteQueueModal')" class="mr-2 px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md">Delete</button>
+                </div>
+            </form>
+        </x-modal>
+
     </x-slot>
 </x-Dashboard>
 
 <script>
-    document.getElementById('toggleModalButton').addEventListener('click', function() {
-        document.getElementById('createQueueModal').classList.remove('hidden');
-    });
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
 
-    document.getElementById('closeModalButton').addEventListener('click', function() {
-        document.getElementById('createQueueModal').classList.add('hidden');
-    });
+    function deleteQueueModal(queueId) {
+        const form = document.getElementById('deleteQueueForm');
+        form.action = `{{ route('admin.queue.delete', ['id' => ':queueId']) }}`.replace(':queueId', queueId);
+        
+        toggleModal('deleteQueueModal');
+    }
 </script>

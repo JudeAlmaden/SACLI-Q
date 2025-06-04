@@ -16,6 +16,7 @@ class Queue extends Model
         'media_advertisement',
     ];
 
+
     public function windows(): HasMany
     {
         return $this->hasMany(Window::class);

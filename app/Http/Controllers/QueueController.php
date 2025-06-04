@@ -13,6 +13,9 @@ use App\Models\Queue;
 use App\Models\Ticket;
 use App\Models\Window; 
 use App\Models\WindowAccess; 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+
 class QueueController extends Controller
 {
     // Managing Queues
@@ -75,17 +78,170 @@ class QueueController extends Controller
         return redirect()->route('admin.queue.list')->with('success', 'Queue deleted successfully.');
     }
 
-    //To see associated queue windows and other data //Admin Section
+    //To see associated queue windows and other data //Admin Sectionpublic function viewQueue($id)
     public function viewQueue($id)
     {
-        $queue = Queue::with('Windows')->findOrFail($id);
-        $WindowIds = $queue->Windows->pluck('id');
-        $uniqueUserIds = WindowAccess::whereIn('window_id', $WindowIds)->pluck('user_id')->unique();
+        // Load queue with related windows, relation method should be named `windows` in your model
+        $queue = Queue::with('windows')->findOrFail($id);
+
+        // Get all window IDs for this queue
+        $windowIds = $queue->windows->pluck('id');
+
+        // Get unique user IDs who have access to these windows
+        $uniqueUserIds = WindowAccess::whereIn('window_id', $windowIds)->pluck('user_id')->unique();
+
+        // Fetch users and access list
         $uniqueUsers = User::whereIn('id', $uniqueUserIds)->get();
-        $accessList = WindowAccess::whereIn('window_id', $WindowIds)->get();
-        $userWindows = WindowAccess::with('Window')->whereIn('user_id', $uniqueUserIds)->get()->groupBy('user_id');
+        $accessList = WindowAccess::whereIn('window_id', $windowIds)->get();
+
+        // User windows grouped by user_id with eager loading of window relation (relation should be `window`)
+        $userWindows = WindowAccess::with('window')->whereIn('user_id', $uniqueUserIds)->get()->groupBy('user_id');
+
+        // Get tickets for this queue
+        $tickets = Ticket::where('queue_id', $queue->id)->get();
+
+        $totalTickets = $tickets->count();
+        $servedTickets = $tickets->whereNotNull('completed_at');
+        $servedCount = $servedTickets->count();
+
+        // Average Queue Time in seconds
+    $averageQueueTime = $servedTickets->map(function ($ticket) {
+        $completedAt = \Carbon\Carbon::parse($ticket->completed_at);
+        $createdAt = \Carbon\Carbon::parse($ticket->created_at);
+        return $completedAt->timestamp - $createdAt->timestamp;
+    })->filter()->avg();
+
+
+        // Tickets count per user (group by handled_by)
+        $ticketsPerUser = $servedTickets->groupBy('handled_by')->map->count();
+
+        // Date-based analytics
+        $today = now()->startOfDay();
+        $ticketsToday = $tickets->where('created_at', '>=', $today)->count();
+        $servedToday = $servedTickets->where('completed_at', '>=', $today)->count();
+
+        $firstDate = $tickets->min('created_at');
+        $daysSpan = $firstDate ? now()->diffInDays($firstDate) ?: 1 : 1;
+        $averageTicketsPerDay = round($totalTickets / $daysSpan, 2);
+
+        // Tickets grouped by day
+        $ticketsPerDay = $tickets->groupBy(function ($ticket) {
+            return $ticket->created_at->format('Y-m-d');
+        })->map->count();
+
+        $peakDay = $ticketsPerDay->sortDesc()->keys()->first();
+        $peakDayCount = $ticketsPerDay->max();
+
+        // Ticket counts by period using Eloquent queries directly to avoid filtering on collection
+        $ticketsByPeriod = [
+            'today' => Ticket::where('queue_id', $queue->id)->where('created_at', '>=', now()->startOfDay())->count(),
+            'this_week' => Ticket::where('queue_id', $queue->id)->where('created_at', '>=', now()->startOfWeek())->count(),
+            'this_month' => Ticket::where('queue_id', $queue->id)->where('created_at', '>=', now()->startOfMonth())->count(),
+            'this_year' => Ticket::where('queue_id', $queue->id)->where('created_at', '>=', now()->startOfYear())->count(),
+            'lifetime' => $totalTickets,
+        ];
+
+        $tickets = \App\Models\Ticket::where('queue_id', $queue->id)->get();
+        $windows = $queue->windows;
+
+        $aggregatedTickets = $this->aggregateTicketsByScale($tickets, $windows);
+
+
+        // Tickets per window per day for last 30 days
+        $startDate = now()->subDays(30)->startOfDay();
+
+        $ticketsLast30Days = Ticket::select('window_id')
+            ->selectRaw('DATE(created_at) as date')
+            ->selectRaw('COUNT(*) as count')
+            ->where('queue_id', $queue->id)
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('window_id', 'date')
+            ->orderBy('date')
+            ->get();
+
+        // Prepare dates for last 30 days (array of strings "Y-m-d")
+        $dates = collect(range(0, 29))
+            ->map(fn($daysAgo) => now()->subDays($daysAgo)->format('Y-m-d'))
+            ->reverse()
+            ->values();
+
+        // Tickets count per window per date
+        $windowTicketsByDate = [];
+        foreach ($queue->windows as $window) {
+            $windowTicketsByDate[$window->id] = $dates->map(function ($date) use ($ticketsLast30Days, $window) {
+                $ticket = $ticketsLast30Days->firstWhere(fn($item) =>
+                    $item->window_id == $window->id && $item->date == $date
+                );
+                return $ticket ? $ticket->count : 0;
+            });
+        }
         
-        return view('admin.QueueManagement', compact('queue', 'uniqueUsers', 'accessList', 'userWindows'));
+        $analytics = [
+            'totalTickets' => $totalTickets,
+            'servedCount' => $servedCount,
+            'averageQueueTime' => $averageQueueTime,
+            'ticketsPerUser' => $ticketsPerUser,
+            'ticketsToday' => $ticketsToday,
+            'servedToday' => $servedToday,
+            'averageTicketsPerDay' => $averageTicketsPerDay,
+            'peakDay' => $peakDay,
+            'peakDayCount' => $peakDayCount,
+            'ticketsByPeriod' => $ticketsByPeriod,
+            'windowTicketsByDate' => $windowTicketsByDate,
+            'windowIds' => $windowIds,
+            'dates' => $dates,
+        ];
+
+        return view('admin.QueueManagement', compact(
+            'queue',
+            'uniqueUsers',
+            'accessList',
+            'userWindows',
+            'analytics',
+            'aggregatedTickets'
+        ));
+    }
+
+
+
+    function aggregateTicketsByScale($tickets, $windows)
+    {
+        $result = [
+            'day' => [],
+            'week' => [],
+            'month' => [],
+            'year' => [],
+        ];
+
+        foreach ($windows as $window) {
+            $result['day'][$window->id] = [];
+            $result['week'][$window->id] = [];
+            $result['month'][$window->id] = [];
+            $result['year'][$window->id] = [];
+        }
+
+        foreach ($tickets as $ticket) {
+            $date = Carbon::parse($ticket->created_at);
+            $windowId = $ticket->window_id;
+
+            // By day
+            $dayKey = $date->format('Y-m-d');
+            $result['day'][$windowId][$dayKey] = ($result['day'][$windowId][$dayKey] ?? 0) + 1;
+
+            // By week (ISO week)
+            $weekKey = $date->format('o') . '-W' . $date->isoWeek();
+            $result['week'][$windowId][$weekKey] = ($result['week'][$windowId][$weekKey] ?? 0) + 1;
+
+            // By month
+            $monthKey = $date->format('Y-m');
+            $result['month'][$windowId][$monthKey] = ($result['month'][$windowId][$monthKey] ?? 0) + 1;
+
+            // By year
+            $yearKey = $date->format('Y');
+            $result['year'][$windowId][$yearKey] = ($result['year'][$windowId][$yearKey] ?? 0) + 1;
+        }
+
+        return $result;
     }
 
     public function updateMediaAds(Request $request, $id)
@@ -140,12 +296,85 @@ class QueueController extends Controller
     //view a window  from a queue to see who are the users who has access
     public function viewWindow($id)
     {
-        $window = Window::findOrFail($id);
+        $window = Window::with('users')->findOrFail($id);
         $users = $window->users;
-        $allUsers = User::all(); 
+        $allUsers = User::all(); // for name resolution in view
 
-        return view('admin.window', compact('window', 'users', 'allUsers'));
+        $analytics = [
+            'ticketsByUser' => [
+                'day' => [],
+                'week' => [],
+                'year' => [],
+            ],
+            'averageQueueTime' => [
+                'overall' => null,
+            ],
+            'averageHandleTime' => [
+                'perUser' => [],
+                'overall' => null,
+            ]
+        ];
+
+        $overallQueueTimes = [];
+        $overallHandleTimes = [];
+
+        foreach ($users as $user) {
+            $userTickets = Ticket::where('handled_by', $user->id)
+                                ->where('window_id', $window->id)
+                                ->where('status', 'Completed')
+                                ->whereNotNull('called_at')
+                                ->whereNotNull('completed_at')
+                                ->get();
+
+            $userHandleSeconds = 0;
+            $userTicketCount = 0;
+
+            foreach ($userTickets as $ticket) {
+                $createdAt = Carbon::parse($ticket->created_at);
+                $calledAt = Carbon::parse($ticket->called_at);
+                $completedAt = Carbon::parse($ticket->completed_at);
+
+                if ($calledAt->gt($createdAt) && $completedAt->gt($calledAt)) {
+                    $queueTime = $calledAt->diffInSeconds($createdAt);
+                    $handleTime = $completedAt->diffInSeconds($calledAt);
+
+                    $overallQueueTimes[] = $queueTime;
+                    $overallHandleTimes[] = $handleTime;
+
+                    $userHandleSeconds += $handleTime;
+                    $userTicketCount++;
+
+                    $day = $createdAt->format('Y-m-d');
+                    $analytics['ticketsByUser']['day'][$user->id][$day] =
+                        ($analytics['ticketsByUser']['day'][$user->id][$day] ?? 0) + 1;
+
+                    $week = $createdAt->format('o-\WW');
+                    $analytics['ticketsByUser']['week'][$user->id][$week] =
+                        ($analytics['ticketsByUser']['week'][$user->id][$week] ?? 0) + 1;
+
+                    $year = $createdAt->format('Y');
+                    $analytics['ticketsByUser']['year'][$user->id][$year] =
+                        ($analytics['ticketsByUser']['year'][$user->id][$year] ?? 0) + 1;
+                }
+            }
+
+            $analytics['averageHandleTime']['perUser'][$user->id] = $userTicketCount > 0
+                ? round($userHandleSeconds / $userTicketCount)
+                : null;
+        }
+
+        $analytics['averageQueueTime']['overall'] = count($overallQueueTimes) > 0
+            ? round(array_sum($overallQueueTimes) / count($overallQueueTimes))
+            : null;
+
+        $analytics['averageHandleTime']['overall'] = count($overallHandleTimes) > 0
+            ? round(array_sum($overallHandleTimes) / count($overallHandleTimes))
+            : null;
+
+        return view('admin.window', compact('window', 'users', 'allUsers', 'analytics'));
     }
+
+
 
     public function createWindow(Request $request, $queue_id)
     {
