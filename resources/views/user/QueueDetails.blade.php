@@ -228,8 +228,7 @@
                         location.reload()
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while updating the window status.');
+                        alert(data.message);
                     });
             });
         });
@@ -249,7 +248,7 @@
                     if (data.success) {
                         alert('Queue status updated successfully.');
                     } else {
-                        alert('Failed to update queue status.');
+                        alert(data.message);
                     }
 
                     setTimeout(() => location.reload(true), 100);
@@ -275,7 +274,7 @@
                     if (data.success) {
                         alert('Queue cleared successfully.');
                     } else {
-                        alert('Failed to clear queue.');
+                        alert(data.message);
                     }
                 })
                 .catch(error => {
@@ -326,7 +325,7 @@
                     if (data.success) {
                         alert('Daily ticket limit has been changed.');
                     } else {
-                        alert('Failed to update limit.');
+                        alert(data.message);
                     }
 
                     setTimeout(() => location.reload(true), 100);

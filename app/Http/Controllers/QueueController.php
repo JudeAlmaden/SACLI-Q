@@ -208,6 +208,7 @@ class QueueController extends Controller
             $access->can_close_any_window = $request->input('can_close_any_window', false);
             $access->can_close_queue = $request->input('can_close_queue', false);
             $access->can_clear_queue = $request->input('can_clear_queue', false);
+            $access->can_change_ticket_limit = $request->input('can_change_ticket_limit', false);
             $access->save();
         }
     

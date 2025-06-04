@@ -85,17 +85,29 @@ class APIController extends Controller
     //Setting window ticket generation limit
     public function setLimit($window_id, $limit)
     {
-        // Validate limit value (make sure it's an integer and within a valid range)
-        if (!is_numeric($limit) || $limit <= 0) {
-            return response()->json(['error' => 'Invalid limit value.'], 400);
-        }
-
         // Find the window by its ID
         $window = Window::find($window_id);
+        $user_id = Auth::user()->id;
+        
+        // Check if the user has privileges to toggle the window
+        $accessExists = WindowAccess::where('user_id', $user_id)
+                                     ->where('queue_id', $window->queue_id)
+                                     ->where(function ($query) {
+                                         $query->where('can_change_ticket_limit', true);
+                                     })
+                                     ->exists();
+        if (!$accessExists) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to change this']);
+        }
+
+        // Validate limit value (make sure it's an integer and within a valid range)
+        if (!is_numeric($limit) || $limit <= 0) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid limit value.'], 400);
+        }
 
         if (!$window) {
             // If the window doesn't exist, return a 404 response
-            return response()->json(['error' => 'Window not found.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Window not found.'], 404);
         }
 
         // Update the window's limit
@@ -103,7 +115,7 @@ class APIController extends Controller
         $window->save();
 
         // Return a success response
-        return response()->json(['success' => 'Limit updated successfully.'], 200);
+        return response()->json(['status' => 'success', 'message' => 'Limit updated successfully.'], 200);
     }
 
 

@@ -181,6 +181,7 @@
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Any Window</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Queue</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Clear Queue</th>
+                                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Change Ticket Limit</th>
                                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Actions</th>
                                         </tr>
                                     </thead>
@@ -209,6 +210,9 @@
                                                     <input type="checkbox" {{ $access->can_clear_queue ? 'checked' : '' }} class="form-checkbox" data-id="{{ $user->id }}" data-field="can_clear_queue">
                                                 </td>
                                                 <td class="px-6 py-4 text-center">
+                                                    <input type="checkbox" {{ $access->can_change_ticket_limit ? 'checked' : '' }} class="form-checkbox" data-id="{{ $user->id }}" data-field="can_change_ticket_limit">
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
                                                     <button class="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition update-access" data-user-id="{{ $user->id }}" data-queue-id="{{ $queue->id }}">Update</button>
                                                 </td>
                                             </tr>
@@ -223,7 +227,7 @@
                 </div>
 
                 <!-- Upload Section -->
-                <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-3xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-full mx-auto">
                     <h2 class="text-2xl font-semibold text-gray-900 mb-1">Advertisement</h2>
                     <p class="text-sm text-gray-500 mb-4">You can place your ad content here.</p>
 
@@ -293,10 +297,12 @@
         $('.update-access').on('click', function () {
             const userId = $(this).data('user-id');
             const queueId = $(this).data('queue-id');
+            //Honestly can just change this to get the closest radio element
             const canCloseOwnWindow = $(`input[data-id="${userId}"][data-field="can_close_own_window"]`).prop('checked');
             const canCloseAnyWindow = $(`input[data-id="${userId}"][data-field="can_close_any_window"]`).prop('checked');
             const canCloseQueue = $(`input[data-id="${userId}"][data-field="can_close_queue"]`).prop('checked');
             const canClearQueue = $(`input[data-id="${userId}"][data-field="can_clear_queue"]`).prop('checked');
+            const canChangeTicketLimit = $(`input[data-id="${userId}"][data-field="can_change_ticket_limit"]`).prop('checked');
 
             $.ajax({
                 url: "{{ route('update-access', ['user_id' => '__userId__', 'queue_id' => '__queueId__']) }}"
@@ -308,7 +314,8 @@
                     can_close_own_window: canCloseOwnWindow,
                     can_close_any_window: canCloseAnyWindow,
                     can_close_queue: canCloseQueue,
-                    can_clear_queue: canClearQueue
+                    can_clear_queue: canClearQueue,
+                    can_change_ticket_limit:canChangeTicketLimit
                 }),
                 success: function (data) {
                     alert(data.success ? 'Access privileges updated successfully.' : 'Failed to update access privileges.');

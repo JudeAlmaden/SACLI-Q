@@ -65,6 +65,7 @@ return new class extends Migration
             $table->boolean('can_close_any_window')->default(false);
             $table->boolean('can_close_queue')->default(false);
             $table->boolean('can_clear_queue')->default(false);
+            $table->boolean('can_change_ticket_limit')->default(false);
             $table->timestamps();
         });
 

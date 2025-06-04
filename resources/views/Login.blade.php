@@ -50,11 +50,13 @@
                             </div>
 
                             <!-- Alerts -->
-                            <div class="mt-4">
-                                <x-ErrorAlert />
-                                <x-SuccessAlert />
-                            </div>
-                        </form>
+
+                        </form>                            
+
+                    </div>                        
+                    <div class="mt-4">
+                        <x-ErrorAlert />
+                        <x-SuccessAlert />
                     </div>
                 </div>
             </div>

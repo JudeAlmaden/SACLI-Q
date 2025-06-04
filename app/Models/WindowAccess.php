@@ -17,6 +17,7 @@ class WindowAccess extends Model
         'can_close_any_window',
         'can_close_queue',
         'can_clear_queue',
+        'can_change_ticket_limit'
     ];
 
     public function user()
