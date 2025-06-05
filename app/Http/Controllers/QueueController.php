@@ -120,8 +120,8 @@ class QueueController extends Controller
         $ticketsToday = $tickets->where('created_at', '>=', $today)->count();
         $servedToday = $servedTickets->where('completed_at', '>=', $today)->count();
 
-        $firstDate = $tickets->min('created_at');
-        $daysSpan = $firstDate ? now()->diffInDays($firstDate) ?: 1 : 1;
+        $firstDate = $queue->min('created_at');
+        $daysSpan = $firstDate ? max(1, (int) now()->diffInDays($firstDate)) : 1;
         $averageTicketsPerDay = round($totalTickets / $daysSpan, 2);
 
         // Tickets grouped by day
@@ -359,16 +359,16 @@ class QueueController extends Controller
             }
 
             $analytics['averageHandleTime']['perUser'][$user->id] = $userTicketCount > 0
-                ? round($userHandleSeconds / $userTicketCount)
+                ? round($userHandleSeconds / $userTicketCount) * -1
                 : null;
         }
 
         $analytics['averageQueueTime']['overall'] = count($overallQueueTimes) > 0
-            ? round(array_sum($overallQueueTimes) / count($overallQueueTimes))
+            ? round(array_sum($overallQueueTimes) / count($overallQueueTimes)) * -1
             : null;
 
         $analytics['averageHandleTime']['overall'] = count($overallHandleTimes) > 0
-            ? round(array_sum($overallHandleTimes) / count($overallHandleTimes))
+            ? round(array_sum($overallHandleTimes) / count($overallHandleTimes)) * -1
             : null;
 
         return view('admin.window', compact('window', 'users', 'allUsers', 'analytics'));

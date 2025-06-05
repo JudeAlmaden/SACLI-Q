@@ -43,7 +43,7 @@
                 </div>
 
                 <!-- Users with Access -->
-                <div class="shadow-lg p-6 border rounded-lg">
+                <div class="shadow-lg p-6 border rounded-lg" style="margin-bottom:20%">
                     <h2 class="text-xl font-bold mb-4">Users with Access</h2>
                     @if ($users->isNotEmpty())
                         <div class="overflow-x-auto">

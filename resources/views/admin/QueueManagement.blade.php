@@ -17,7 +17,7 @@
                             <a href="#" class="inline-block px-4 py-2 border-b-2 border-transparent hover:border-gray-300" data-tab="access">User Access</a>
                         </li>
                         <li class="mr-1">
-                            <a href="#" class="inline-block px-4 py-2 border-b-2 border-transparent hover:border-gray-300" data-tab="copy">Copy Links</a>
+                            <a href="#" class="inline-block px-4 py-2 border-b-2 border-transparent hover:border-gray-300" data-tab="links">Links</a>
                         </li>
                         <li class="mr-1">
                             <a href="#" class="inline-block px-4 py-2 border-b-2 border-transparent hover:border-gray-300" data-tab="windows">Windows</a>
@@ -46,7 +46,7 @@
                                 :userWindows="$userWindows"/>
                         </div>
 
-                        <div class="tab-panel hidden" id="copy">
+                        <div class="tab-panel hidden" id="links">
                             <x-copy-links :queue="$queue"/>
                         </div>
 

@@ -12,13 +12,13 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row justify-between items-center">
-                    <form method="GET" action="{{ route('admin.queue.list') }}" class="w-full sm:w-auto sm:mr-4">
-                        <div class="flex items-center w-full sm:w-auto mt-4">
-                            <input type="text" name="search" placeholder="Search queues..." class="w-full sm:w-96 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
-                            <button type="submit" class="ml-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Search</button>
+                    <form method="GET" action="{{ route('admin.queue.list') }}" class="flex-auto sm:w-auto sm:mr-4">
+                        <div class="flex items-center w-100 sm:w-auto mt-4">
+                            <input type="text" name="search" placeholder="Search queues..."  class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+                            <button type="submit" class="ml-2 px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800">Search</button>
                         </div>
                     </form>
-                    <button id="toggleCreateQueue" onclick="toggleModal('createQueue')" class="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <button id="toggleCreateQueue" onclick="toggleModal('createQueue')" class="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800">
                         <i class="fas fa-plus mr-2"></i>
                         Create New Queue
                     </button>

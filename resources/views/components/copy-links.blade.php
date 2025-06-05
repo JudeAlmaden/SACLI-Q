@@ -1,6 +1,6 @@
 @props(['queue'])
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-    <div class="relative flex flex-col h-full p-4 border border-gray-300 bg-white rounded-lg shadow">
+    <div class="relative flex flex-col h-full p-4 border-b border-gray-300 bg-white rounded-lg shadow">
         <div class="flex items-center gap-2 mb-2">
             <h1 class="text-green-700">URL for live view:</h1>
         </div>

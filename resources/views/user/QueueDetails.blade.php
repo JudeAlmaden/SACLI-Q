@@ -39,12 +39,12 @@
                     </div>
 
                     <!-- Links -->
-                            <x-copy-links :queue="$queue"/>
-                    
+                    <div class="p-5">
+                        <x-copy-links :queue="$queue"/>
+                    </div>
                     
                     <!-- Window  Section -->
-                    <div class="px-6 py-6">
-
+                    <div class="px-6 ">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-xl font-semibold text-gray-700">Window Availability  and ticket limits</h2>
                         </div>
