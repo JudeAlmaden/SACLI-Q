@@ -71,8 +71,13 @@
         }
 
         $.ajax({
-            url: `{{ route('getTicketsOnHold', ['window_id' => $window->id]) }}?page=${page}&per_page=${onHoldTicketsPerPage}&search=${searchQueryOnHoldTicket}`,
+            url: `{{ route('getTicketsOnHold', ['window_id' => $window->id]) }}`,
             method: 'GET',
+            data: {
+                page: page,
+                per_page: onHoldTicketsPerPage,
+                search: searchQueryOnHoldTicket,
+            },              
             success: function(response) {
                 if (response.success) {
                     totalOnHoldPages = response.total_pages;
@@ -145,18 +150,16 @@
         // Replace the placeholder with the actual ticketId
         const finalUrl = url.replace('__TICKET_ID__', ticketId);
 
-        console.log(finalUrl);
         $.ajax({
             url: finalUrl,
             method: 'GET',
             success: function(response) {
 
                 if (response.success) {
-                    location.reload();
-                    alert(response['message']);
-                } else {
-                    alert(response['message']);
-                }
+                    location.reload()
+                }      
+                alert(response['message']);
+                
                 location.reload();
             },
             error: function(xhr, status, error) {

@@ -134,8 +134,6 @@
     </x-slot>
 </x-Dashboard>
 
-
-
 <script>
 $(document).ready(function() {
     var token = "{{ session('token') }}";

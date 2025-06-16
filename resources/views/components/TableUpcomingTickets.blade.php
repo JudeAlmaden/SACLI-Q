@@ -101,8 +101,15 @@
         }
 
         $.ajax({
-            url: `{{ route('getUpcomingTickets', ['window_id' => $window->id]) }}?page=${page}&per_page=${upcomingTicketsPerPage}&sort_by=${sortByUpcomingTickets}&sort_order=${sortOrderUpcomingTickets}&search=${searchQueryUpcomingTicket}`,
+        url: `{{ route('getUpcomingTickets', ['window_id' => $window->id]) }}`,
             method: 'GET',
+            data: {
+                page: page,
+                per_page: upcomingTicketsPerPage,
+                sort_by: sortByUpcomingTickets,
+                sort_order: sortOrderUpcomingTickets,
+                search: searchQueryUpcomingTicket,
+            },
             success: function(response) {
                 if (response.success && response.tickets.length > 0) {
                     totalUpcomingTickets = response.total_pages;
@@ -181,7 +188,7 @@
     $('#search-upcoming').on('input', function() {
         searchQueryUpcomingTicket = $(this).val(); // Get the search query
         upcomingTicketsPage = 1; // Reset to the first page when searching
-        get(onHoldPage); // Fetch tickets based on search query
+        getUpcomingTickets(onHoldPage); // Fetch tickets based on search query
     });
 
     function handleUpcomingTicket(ticketId) {

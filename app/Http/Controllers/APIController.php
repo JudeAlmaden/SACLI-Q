@@ -397,42 +397,64 @@ class APIController extends Controller
     }
 
     // Get all On-Hold tickets with pagination
-    public function getTicketsOnHold($WindowId, Request $request) {    
-        $search = $request->input('search', '');  // Get search term
+    public function getTicketsOnHold($WindowId, Request $request) {
+        // Input values with defaults
+        $search = $request->input('search', '');
         $page = $request->input('page', 1);
         $perPage = $request->input('per_page', 20);
-    
+        $sortBy = $request->input('sort_by', 'created_at'); // Default sort column
+        $sortOrder = $request->input('sort_order', 'desc'); // Default sort order
+
+        // Base query
         $query = Ticket::where('window_id', $WindowId)
-                        ->where('status', 'On Hold')
-                        ->whereDate('created_at', Carbon::today()) ;
-    
-        // Apply search if query exists
-        if ($search) {
-            $query->where('code', 'like', '%' . $search . '%');  // You can adjust this field and condition based on your ticket structure
+                    ->where('status', 'On Hold')
+                    ->whereDate('created_at', Carbon::today());
+
+        // Apply search if provided
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('code', 'like', '%' . $search . '%');
+                // Add more fields here if needed, e.g.:
+                // ->orWhere('user_name', 'like', "%$search%")
+            });
         }
-    
-        $tickets = $query->paginate($perPage, ['*'], 'page', $page);
-    
+
+        // Sorting + pagination
+        $tickets = $query->orderBy($sortBy, $sortOrder)
+                        ->paginate($perPage, ['*'], 'page', $page);
+
         return response()->json([
             'success' => true,
             'tickets' => $tickets->items(),
             'total_pages' => $tickets->lastPage(),
+            'current_page' => $tickets->currentPage(),
         ]);
     }
 
+
     public function getUpcomingTickets($WindowId, Request $request) {
-        // Get the per_page, sort_by, and sort_order parameters
+        // Get pagination and sorting parameters
         $perPage = $request->get('per_page', 20);
-        $sortBy = $request->get('sort_by', 'completed_at'); // Default to 'completed_at'
-        $sortOrder = $request->get('sort_order', 'desc'); // Default to descending order
-    
-        // Get tickets, paginate, and apply dynamic sorting
-        $tickets = Ticket::where('window_id', $WindowId)
-                         ->where('status', 'Waiting')
-                         ->whereDate('created_at', Carbon::today()) 
-                         ->orderBy($sortBy, $sortOrder) // Apply dynamic sorting
-                         ->paginate($perPage);
-    
+        $sortBy = $request->get('sort_by', 'created_at'); // Default field to sort
+        $sortOrder = $request->get('sort_order', 'desc');
+        $search = $request->get('search');
+
+        // Build base query
+        $query = Ticket::where('window_id', $WindowId)
+                    ->where('status', 'Waiting')
+                    ->whereDate('created_at', Carbon::today());
+
+        // Apply search if provided
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('code', 'like', "%$search%"); // Add more fields as needed
+            });
+        }
+
+        // Apply sorting and pagination
+        $tickets = $query->orderBy($sortBy, $sortOrder)
+                        ->paginate($perPage);
+
         return response()->json([
             'success' => true,
             'tickets' => $tickets->items(),
