@@ -91,11 +91,25 @@ class PublicController extends Controller
                 ->orderByDesc('created_at')
                 ->first();
 
-            if ($latestTicket && is_numeric($latestTicket->code)) {
-                $code = str_pad((int)$latestTicket->code + 1, 4, '0', STR_PAD_LEFT);
+            // First letter of the window name (uppercase)
+            $prefix = strtoupper(substr($window->name, 0, 1));
+
+            // Get the latest numeric part of the code for this window today
+            $latestCode = Ticket::where('window_id', $request->window_id)
+                ->whereDate('created_at', Carbon::today())
+                ->where('code', 'like', $prefix . '%')
+                ->orderByDesc('created_at')
+                ->pluck('code')
+                ->first();
+
+            if ($latestCode && preg_match('/' . $prefix . '(\d{4})/', $latestCode, $matches)) {
+                $numberPart = (int) $matches[1] + 1;
             } else {
-                $code = '0001';
+                $numberPart = 1;
             }
+
+            $code = $prefix . str_pad($numberPart, 4, '0', STR_PAD_LEFT);
+
             
             // Get the next ticket number for the window and increment it to 1 and it will use it for the ticket number here
             $ticket_number = Ticket::where('window_id', $request->window_id)
@@ -178,7 +192,6 @@ class PublicController extends Controller
         $validator = Validator::make($request->all(), [
             'queue_id' => 'required',
             'ticket_number' => 'required',
-            'window_name' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -192,10 +205,9 @@ class PublicController extends Controller
         // Store values
         $queue_id = $request->queue_id;
         $ticketNumber = $request->ticket_number;
-        $windowName = $request->window_name;
 
         // Broadcast the event
-        broadcast(new CallingTicket($queue_id, $ticketNumber, $windowName));
+        broadcast(new CallingTicket($queue_id, $ticketNumber));
 
         // Return the broadcasted data as part of the success response
         return response()->json([
@@ -203,7 +215,6 @@ class PublicController extends Controller
             'message' => 'Event broadcasted',
             'data' => [
                 'ticketNumber' => $ticketNumber,
-                'windowName' => $windowName,
                 'queueCode' => $queue_id,
             ]
         ]);

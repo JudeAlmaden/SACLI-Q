@@ -23,7 +23,7 @@
                 <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
                     Ticket Code
                 </th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b">
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b" >
                     Called At
                 </th>
                 <th id="sort-action" class="px-6 py-3 text-left text-sm font-medium text-gray-800 uppercase tracking-wider border-b text-center" >

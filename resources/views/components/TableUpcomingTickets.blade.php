@@ -82,7 +82,7 @@
     let totalUpcomingTickets = 1;
 
     let sortByUpcomingTickets = 'created_at'; // Default sort by 'completed_at'
-    let sortOrderUpcomingTickets = 'desc'; // Default sort order 'desc'
+    let sortOrderUpcomingTickets = 'asc'; // Default sort order 'desc'
     let searchQueryUpcomingTicket = ''
     
     function getUpcomingTickets(page = 1) {
@@ -138,8 +138,6 @@
                         </tr>`
                     );
                 }
-
-                console.log(response)
             },
             error: function(xhr, status, error) {
                 console.error("Error:", error);
@@ -155,7 +153,7 @@
         sortOrderUpcomingTickets = (sortOrderUpcomingTickets === 'asc') ? 'desc' : 'asc';
         // Toggle arrow classes
         toggleSortArrowUpcomingTickets($(this), sortOrderUpcomingTickets);
-        getCompletedTickets(upcomingTicketsPage); // Fetch sorted data
+        getUpcomingTickets(upcomingTicketsPage); // Fetch sorted data
     });
 
     function toggleSortArrowUpcomingTickets(element, order) {
@@ -202,7 +200,6 @@
             url: finalUrl,
             method: 'GET',
             success: function(response) {
-                console.log(response);
                 if (response.success) {
                     location.reload();
                     alert(response['message']);

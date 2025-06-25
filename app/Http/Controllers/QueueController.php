@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use App\Models\Queue;
 use App\Models\Ticket;
-use App\Models\Window; 
-use App\Models\WindowAccess; 
+use App\Models\Window;
+use App\Models\WindowAccess;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
@@ -56,7 +56,7 @@ class QueueController extends Controller
         // Create and save the queue
         $queue = new Queue();
         $queue->name = $request->name;
-        $queue->code = $uniqueCode; 
+        $queue->code = $uniqueCode;
         $queue->save();
 
         // Save associated window groups if provided
@@ -69,7 +69,7 @@ class QueueController extends Controller
 
         return redirect()->route('admin.queue.list')->with('success', 'Queue created successfully.');
     }
-    
+
     public function deleteQueue($id)
     {
         $queue = Queue::findOrFail($id);
@@ -105,11 +105,11 @@ class QueueController extends Controller
         $servedCount = $servedTickets->count();
 
         // Average Queue Time in seconds
-    $averageQueueTime = $servedTickets->map(function ($ticket) {
-        $completedAt = \Carbon\Carbon::parse($ticket->completed_at);
-        $createdAt = \Carbon\Carbon::parse($ticket->created_at);
-        return $completedAt->timestamp - $createdAt->timestamp;
-    })->filter()->avg();
+        $averageQueueTime = $servedTickets->map(function ($ticket) {
+            $completedAt = \Carbon\Carbon::parse($ticket->completed_at);
+            $createdAt = \Carbon\Carbon::parse($ticket->created_at);
+            return $completedAt->timestamp - $createdAt->timestamp;
+        })->filter()->avg();
 
 
         // Tickets count per user (group by handled_by)
@@ -169,13 +169,14 @@ class QueueController extends Controller
         $windowTicketsByDate = [];
         foreach ($queue->windows as $window) {
             $windowTicketsByDate[$window->id] = $dates->map(function ($date) use ($ticketsLast30Days, $window) {
-                $ticket = $ticketsLast30Days->firstWhere(fn($item) =>
+                $ticket = $ticketsLast30Days->firstWhere(
+                    fn($item) =>
                     $item->window_id == $window->id && $item->date == $date
                 );
                 return $ticket ? $ticket->count : 0;
             });
         }
-        
+
         $analytics = [
             'totalTickets' => $totalTickets,
             'servedCount' => $servedCount,
@@ -298,7 +299,7 @@ class QueueController extends Controller
     {
         $window = Window::with('users')->findOrFail($id);
         $users = $window->users;
-        $allUsers = User::all(); // for name resolution in view
+        $allUsers = User::all();
 
         $analytics = [
             'ticketsByUser' => [
@@ -308,10 +309,12 @@ class QueueController extends Controller
             ],
             'averageQueueTime' => [
                 'overall' => null,
+                'formatted' => null,
             ],
             'averageHandleTime' => [
                 'perUser' => [],
                 'overall' => null,
+                'formatted' => null,
             ]
         ];
 
@@ -320,11 +323,11 @@ class QueueController extends Controller
 
         foreach ($users as $user) {
             $userTickets = Ticket::where('handled_by', $user->id)
-                                ->where('window_id', $window->id)
-                                ->where('status', 'Completed')
-                                ->whereNotNull('called_at')
-                                ->whereNotNull('completed_at')
-                                ->get();
+                ->where('window_id', $window->id)
+                ->where('status', 'Completed')
+                ->whereNotNull('called_at')
+                ->whereNotNull('completed_at')
+                ->get();
 
             $userHandleSeconds = 0;
             $userTicketCount = 0;
@@ -334,9 +337,10 @@ class QueueController extends Controller
                 $calledAt = Carbon::parse($ticket->called_at);
                 $completedAt = Carbon::parse($ticket->completed_at);
 
-                if ($calledAt->gt($createdAt) && $completedAt->gt($calledAt)) {
-                    $queueTime = $calledAt->diffInSeconds($createdAt);
-                    $handleTime = $completedAt->diffInSeconds($calledAt);
+                if ($createdAt->lt($calledAt) && $calledAt->lt($completedAt)) {
+                    // ✅ Correct order of diff
+                    $queueTime = $createdAt->diffInSeconds($calledAt);
+                    $handleTime = $calledAt->diffInSeconds($completedAt);
 
                     $overallQueueTimes[] = $queueTime;
                     $overallHandleTimes[] = $handleTime;
@@ -359,21 +363,44 @@ class QueueController extends Controller
             }
 
             $analytics['averageHandleTime']['perUser'][$user->id] = $userTicketCount > 0
-                ? round($userHandleSeconds / $userTicketCount) * -1
+                ? round($userHandleSeconds / $userTicketCount)
                 : null;
         }
 
-        $analytics['averageQueueTime']['overall'] = count($overallQueueTimes) > 0
-            ? round(array_sum($overallQueueTimes) / count($overallQueueTimes)) * -1
+        // ✅ Calculate overall averages
+        $queueAvg = count($overallQueueTimes) > 0
+            ? round(array_sum($overallQueueTimes) / count($overallQueueTimes))
             : null;
 
-        $analytics['averageHandleTime']['overall'] = count($overallHandleTimes) > 0
-            ? round(array_sum($overallHandleTimes) / count($overallHandleTimes)) * -1
+        $handleAvg = count($overallHandleTimes) > 0
+            ? round(array_sum($overallHandleTimes) / count($overallHandleTimes))
             : null;
+
+        $analytics['averageQueueTime']['overall'] = $queueAvg;
+        $analytics['averageHandleTime']['overall'] = $handleAvg;
+
+        $analytics['averageQueueTime']['formatted'] = $queueAvg !== null ? $this->formatDuration($queueAvg) : '0s';
+        $analytics['averageHandleTime']['formatted'] = $handleAvg !== null ? $this->formatDuration($handleAvg) : '0s';
 
         return view('admin.window', compact('window', 'users', 'allUsers', 'analytics'));
     }
 
+    private function formatDuration($seconds)
+    {
+        $days = floor($seconds / 86400);
+        $hours = floor(($seconds % 86400) / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $remainingSeconds = $seconds % 60;
+
+        $parts = [];
+
+        if ($days > 0) $parts[] = "{$days}d";
+        if ($hours > 0 || $days > 0) $parts[] = str_pad($hours, 2, '0', STR_PAD_LEFT) . "h";
+        $parts[] = str_pad($minutes, 2, '0', STR_PAD_LEFT) . "m";
+        $parts[] = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . "s";
+
+        return implode(' ', $parts);
+    }
 
 
     public function createWindow(Request $request, $queue_id)
@@ -386,7 +413,7 @@ class QueueController extends Controller
         $queue = Queue::findOrFail($queue_id);
         $Window = new Window([
             'name' => $request->name,
-            'limit'=> 100,
+            'limit' => 100,
             'description' => $request->description,
         ]);
         $queue->Windows()->save($Window);
@@ -409,9 +436,9 @@ class QueueController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
-    
+
         $Window = Window::findOrFail($id);
-        $Window->users()->attach($request->user_id,["queue_id" => $Window->queue_id]);
+        $Window->users()->attach($request->user_id, ["queue_id" => $Window->queue_id]);
 
         return redirect()->route('admin.window.view', ['id' => $id])->with('success', 'User assigned successfully.');
     }
@@ -429,9 +456,9 @@ class QueueController extends Controller
     public function updateAccess(Request $request, $user_id, $queue_id)
     {
         $accessList = WindowAccess::where('user_id', $user_id)
-                                        ->where('queue_id', $queue_id)
-                                        ->get();
-    
+            ->where('queue_id', $queue_id)
+            ->get();
+
         foreach ($accessList as $access) {
             $access->can_close_own_window = $request->input('can_close_own_window', false);
             $access->can_close_any_window = $request->input('can_close_any_window', false);
@@ -440,7 +467,7 @@ class QueueController extends Controller
             $access->can_change_ticket_limit = $request->input('can_change_ticket_limit', false);
             $access->save();
         }
-    
+
         return response()->json(['success' => true, 'message' => 'Access privileges updated successfully.']);
     }
 
@@ -448,21 +475,21 @@ class QueueController extends Controller
 
     /**
      * User Methods
-     **/ 
+     **/
     public function myQueuesAndWindows()
     {
         $accountId = Session::get('account_id');
-    
+
         $user = User::where('account_id', $accountId)->firstOrFail();
-    
+
         // Get all window groups the user is related to
         $windows = $user->Windows()->with('queue')->get();
-    
+
         // Get all queues related to those window groups
         $queues = Queue::whereHas('Windows', function ($query) use ($windows) {
             $query->whereIn('id', $windows->pluck('id'));
         })->get();
-    
+
         return view('user.MyQueues', compact('queues', 'windows'));
     }
 
@@ -472,105 +499,107 @@ class QueueController extends Controller
     {
         $queue = Queue::with('windows')->findOrFail($id);
         $WindowIds = $queue->windows->pluck('id');
-    
+
         // Get the number of tickets generated today for each window
         $ticketsPerWindow = Ticket::whereIn('window_id', $WindowIds)
-                                    ->whereDate('created_at', Carbon::today())
-                                    ->selectRaw('window_id, count(*) as ticket_count')
-                                    ->groupBy('window_id')
-                                    ->pluck('ticket_count', 'window_id');
-    
+            ->whereDate('created_at', Carbon::today())
+            ->selectRaw('window_id, count(*) as ticket_count')
+            ->groupBy('window_id')
+            ->pluck('ticket_count', 'window_id');
+
         return view('user.queuedetails', compact('queue', 'ticketsPerWindow'));
     }
 
     //Showing the dashboard for queuing
-    public function queueingDashboard(Request $request, $id){
+    public function queueingDashboard(Request $request, $id)
+    {
         $user_id = Auth::user()->id;
         // Fetch the Window and its associated Queue using the provided ID
         $window = Window::with('queue')->findOrFail($id);
 
         //This is 
         $windowAccess = WindowAccess::where('user_id', $user_id)
-        ->where('window_id', $window->id)->first();
+            ->where('window_id', $window->id)->first();
 
-        if($window == null || $windowAccess==null){
+        if ($window == null || $windowAccess == null) {
             return redirect()->route('myQueues')->with('error', 'You do not have access to this window.');
-        }else{
+        } else {
             // Pass the fetched data to the view
             return view('user.QueuingDashboard', compact('windowAccess', 'window', 'user_id'));
         }
     }
 
     //Other Controls
-    public function toggleWindow(Request $request, $id){
+    public function toggleWindow(Request $request, $id)
+    {
         $user = Auth::user();
         $window = Window::findOrFail($id);
         $queueId = $request->input('queue_id');
         $queue = Queue::findOrFail($queueId);
-    
+
         // Check if the user has privileges to toggle the window
         $accessExists = WindowAccess::where('user_id', $user->id)
-                                     ->where('queue_id', $queueId)
-                                     ->where(function ($query) {
-                                         $query->where('can_close_own_window', true)
-                                               ->orWhere('can_close_any_window', true);
-                                     })
-                                     ->exists();
-    
+            ->where('queue_id', $queueId)
+            ->where(function ($query) {
+                $query->where('can_close_own_window', true)
+                    ->orWhere('can_close_any_window', true);
+            })
+            ->exists();
+
         if (!$accessExists) {
             return response()->json(['success' => true, 'message' => 'You do not have the required privileges to perform this action.'], 403);
         }
-    
+
         // Prevent opening the window if the queue is closed
         if ($queue->status === 'closed') {
             return response()->json(['success' => true, 'message' => 'The queue is closed. You cannot open the window.'], 403);
         }
-    
+
         // Toggle the window status
         $window->status = $window->status === 'open' ? 'closed' : 'open';
         $window->save();
-    
+
         broadcast(new QueueSettingsChanged($queue->id));
         return response()->json(['success' => true, 'message' => 'Window status updated successfully.']);
     }
-    
+
     public function toggleQueue($id)
     {
         $user = Auth::user();
         $queue = Queue::findOrFail($id);
-    
+
         // Check if the user has privileges to toggle the queue status
         $accessExists = WindowAccess::where('user_id', $user->id)
-                                    ->where('queue_id', $id)
-                                    ->where('can_close_queue', true)
-                                    ->exists();
-    
+            ->where('queue_id', $id)
+            ->where('can_close_queue', true)
+            ->exists();
+
         if (!$accessExists) {
             return response()->json(['success' => false, 'message' => 'You do not have the required privileges to perform this action.'], 403);
         }
-    
+
         // Toggle the queue status
         $newStatus = $queue->status === 'open' ? 'closed' : 'open';
         $queue->status = $newStatus;
         $queue->save();
-    
+
         // Update the status of all windows associated with the queue
         $queue->windows()->update(['status' => $newStatus]);
         broadcast(new QueueSettingsChanged($queue->id));
         return response()->json(['success' => true, 'message' => 'Queue and windows status updated successfully.']);
     }
-    
-    
+
+
     public function clearQueue($id)
     {
         $user = Auth::user();
         $queue = Queue::findOrFail($id);
         $accessExists = WindowAccess::where('user_id', $user->id)
-                                    ->where('queue_id', $id)
-                                    ->where('can_clear_queue', true)
-                                    ->exists();
-    
-                                    
+            ->where('queue_id', $id)
+            ->where('can_clear_queue', true)
+            ->exists();
+
+
         if (!$accessExists) {
             return response()->json(['success' => false, 'message' => 'You do not have the required privileges to perform this action.'], 403);
         }
@@ -578,11 +607,11 @@ class QueueController extends Controller
         if (!$queue->tickets()->exists()) {
             return response()->json(['success' => true, 'message' => 'No tickets found.']);
         }
-        
+
         $queue->tickets()
-        ->whereIn('status', ['Waiting', 'On Hold'])
-        ->delete();
-    
+            ->whereIn('status', ['Waiting', 'On Hold'])
+            ->delete();
+
         return response()->json(['success' => true, 'message' => 'Queue cleared successfully.']);
     }
 
@@ -595,8 +624,8 @@ class QueueController extends Controller
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         do {
             $code = substr(str_shuffle($characters), 0, 6);
-        } while (Queue::where('code', $code)->exists()); 
-    
+        } while (Queue::where('code', $code)->exists());
+
         return $code;
     }
 }

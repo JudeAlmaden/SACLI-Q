@@ -1,9 +1,9 @@
 <style>
-  /* Fullscreen overlay to prompt user interaction */
+  /* Overlay prompt */
   #startPrompt {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0, 0, 0, 0.75);
     color: white;
     font-size: 2rem;
     display: flex;
@@ -12,71 +12,89 @@
     z-index: 9999;
     cursor: pointer;
   }
+
+  .card {
+    border-radius: 20px;
+    box-shadow: 15px 15px 15px rgb(67, 116, 29),
+                -10px -10px 15px rgba(110, 181, 24, 0.593);
+  }
+
+  /* Global gradient overlay (one only) */
+  .gradient-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    border-radius: 0.5rem;
+    background-blend-mode: normal;
+  }
 </style>
 
-<div id="startPrompt">
-  Click or tap anywhere to start
-</div>
+<!-- Start Prompt Overlay -->
+<div id="startPrompt">Click or tap anywhere to start</div>
 
-<div class="relative h-screen bg-white shadow-lg overflow-hidden rounded-lg shadow-inner" data-twe-carousel-init>
+<!-- Carousel Container -->
+<div class="relative h-full w-full overflow-hidden rounded-lg card">
   <!-- Carousel wrapper -->
-  <div class="carousel-container relative flex transition-transform duration-500 ease-in-out w-full h-full" style="transform: translateX(0);">
+  <div class="carousel-container relative z-0 flex transition-transform duration-500 ease-in-out w-full h-full">
+
     @php
-        $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
+      $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
     @endphp
 
     @if (!empty($mediaAds))
-        @foreach ($mediaAds as $mediaPath)
-            @php
-                $extension = pathinfo($mediaPath, PATHINFO_EXTENSION);
-            @endphp
+      @foreach ($mediaAds as $mediaPath)
+        @php
+          $extension = strtolower(pathinfo($mediaPath, PATHINFO_EXTENSION));
+        @endphp
 
-            <div class="carousel-item relative flex-shrink-0 w-full h-full">
-                @if (in_array(strtolower($extension), ['mp4', 'webm', 'ogg']))
-                  <video 
-                    class="block w-full h-full object-cover carousel-media" 
-                    src="{{ asset('storage/' . $mediaPath) }}" 
-                    controls 
-                    muted 
-                    playsinline 
-                    preload="metadata"
-                  ></video>
-                @else
-                    <img 
-                        src="{{ asset('storage/' . $mediaPath) }}" 
-                        alt="Advertisement" 
-                        class="block w-full h-full object-cover carousel-media" 
-                    />
-                @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-            </div>
-        @endforeach
-    @else
-        <div class="carousel-item relative flex-shrink-0 w-full h-full">
-            <img 
-                src="https://via.placeholder.com/800x600?text=No+Advertisement" 
-                alt="No Advertisement" 
-                class="block w-full h-full object-cover carousel-media" 
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        <div class="carousel-item relative flex-shrink-0 w-full h-full rounded-lg">
+          @if (in_array($extension, ['mp4', 'webm', 'ogg']))
+            <video
+              class="block w-full h-full object-contain carousel-media"
+              src="{{ asset('storage/' . $mediaPath) }}"
+              controls
+              muted
+              playsinline
+              preload="metadata">
+            </video>
+          @else
+            <img
+              src="{{ asset('storage/' . $mediaPath) }}"
+              alt="Advertisement"
+              class="block w-full h-full object-contain carousel-media rounded-lg" />
+          @endif
         </div>
+      @endforeach
+    @else
+      <div class="carousel-item relative flex-shrink-0 w-full h-full">
+        <img
+          src="https://via.placeholder.com/800x600?text=No+Advertisement"
+          alt="No Advertisement"
+          class="block w-full h-full object-cover carousel-media rounded-lg" />
+      </div>
     @endif
+
   </div>
+
+  <!-- Single Gradient Overlay (global) -->
+  <div class="gradient-overlay rounded-lg"></div>
 </div>
 
+<!-- Carousel Script -->
 <script>
   const carouselContainer = document.querySelector('.carousel-container');
   const carouselItems = document.querySelectorAll('.carousel-item');
   const mediaElements = document.querySelectorAll('.carousel-media');
   const startPrompt = document.getElementById('startPrompt');
+
   let activeIndex = 0;
   let carouselStarted = false;
   let timeoutId;
 
   function goToSlide(index) {
     const itemWidth = carouselItems[0].offsetWidth;
-    const translateX = -index * itemWidth;
-    carouselContainer.style.transform = `translateX(${translateX}px)`;
+    carouselContainer.style.transform = `translateX(${-index * itemWidth}px)`;
   }
 
   function playNextMedia() {
@@ -84,19 +102,16 @@
     const currentMedia = mediaElements[activeIndex];
 
     if (currentMedia.tagName.toLowerCase() === 'video') {
-      currentMedia.muted = false;  // unmute video after interaction
+      currentMedia.muted = false;
       currentMedia.currentTime = 0;
 
-      // Play video and wait for end
       currentMedia.play().then(() => {
         currentMedia.onended = () => {
           activeIndex = (activeIndex + 1) % carouselItems.length;
           goToSlide(activeIndex);
           playNextMedia();
         };
-      }).catch(err => {
-        console.error('Video playback failed:', err);
-        // If video play fails, fallback to next slide after 10s
+      }).catch(() => {
         timeoutId = setTimeout(() => {
           activeIndex = (activeIndex + 1) % carouselItems.length;
           goToSlide(activeIndex);
@@ -104,7 +119,6 @@
         }, 10000);
       });
     } else {
-      // Image - show for 10 seconds then next
       timeoutId = setTimeout(() => {
         activeIndex = (activeIndex + 1) % carouselItems.length;
         goToSlide(activeIndex);
@@ -114,25 +128,14 @@
   }
 
   function startCarousel() {
-    if (carouselStarted) return; // Prevent multiple starts
+    if (carouselStarted) return;
     carouselStarted = true;
-
-    // Hide the start prompt overlay
     startPrompt.style.display = 'none';
-
     goToSlide(activeIndex);
     playNextMedia();
-
-    // Remove listener after first interaction
     document.removeEventListener('click', startCarousel);
   }
 
-  // Listen for any user interaction on the document to start
   document.addEventListener('click', startCarousel);
-
-  // Resize correction
-  window.addEventListener('resize', () => {
-    goToSlide(activeIndex);
-  });
-
+  window.addEventListener('resize', () => goToSlide(activeIndex));
 </script>

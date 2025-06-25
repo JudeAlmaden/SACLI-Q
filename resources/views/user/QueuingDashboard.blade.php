@@ -26,27 +26,6 @@
 
             <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
                 <div class="grid grid-cols-1 gap-3">
-                    <!-- window Input Section -->
-                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
-                        <form id="window-form" class="space-y-6">
-                            <div class="flex items-center space-x-4">
-                                <label for="window-name" class="w-12/12 block font-medium text-green-700">
-                                    Window Name:
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="window-name" 
-                                    name="window_name" 
-                                    placeholder="{{ $windowAccess->window_name ?? 'Ex: Window 1' }}"
-                                    class="flex-grow w-9/12 px-3 py-2 border border-green-400 focus:border-green-600 focus:ring-green-500 bg-white text-green-900 rounded-md"
-                                >
-                                <button type="submit" class="p-2 w-3/12 bg-green-600 text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-md">
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-
                     <!-- Combined Description Section -->
                     <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
                         <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
@@ -138,34 +117,35 @@
 $(document).ready(function() {
     var token = "{{ session('token') }}";
 
+    var ticketNumber = null
     //Updating Window name
-    $('#window-form').on('submit', function (e) {
-        e.preventDefault();
+    // $('#window-form').on('submit', function (e) {
+    //     e.preventDefault();
 
-        const windowId = {{ $window->id ?? 'null' }};
-        const windowName = $('#window-name').val();
+    //     const windowId = {{ $window->id ?? 'null' }};
+    //     const windowName = $('#window-name').val();
 
-        $.ajax({
-            url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
-            method: 'POST',
-            data: {
-                window_name: windowName,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function (response) {
-                if (response.success) {
-                    location.reload();
-                    alert(response.message);
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error:', error);
-                alert('An error occurred while updating the window.');
-            }
-        });
-    });
+    //     $.ajax({
+    //         url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
+    //         method: 'POST',
+    //         data: {
+    //             window_name: windowName,
+    //             _token: '{{ csrf_token() }}'
+    //         },
+    //         success: function (response) {
+    //             if (response.success) {
+    //                 location.reload();
+    //                 alert(response.message);
+    //             } else {
+    //                 alert(response.message);
+    //             }
+    //         },
+    //         error: function (xhr, status, error) {
+    //             console.error('Error:', error);
+    //             alert('An error occurred while updating the window.');
+    //         }
+    //     });
+    // });
 
     //Control Buttons
     $('#next-ticket').on('click', function(event) {
@@ -256,13 +236,10 @@ $(document).ready(function() {
     $('#call-ticket').on('click', function(event) {
         event.preventDefault();
 
-        const ticketNumber = $('#current-ticket-number').text().replace(/\D/g, '');
-
         $.ajax({
             url: "{{ route('broadcast.callTicket.event') }}", // no need for route parameters
             method: 'POST',
             data: {
-                window_name: "{{ $windowAccess->window_name}}", //name of the user with access to the window
                 ticket_number: ticketNumber,  
                 queue_id: "{{ $window->queue_id}}", //queue code is alias for queueID
                 _token: "{{ csrf_token() }}"  
@@ -297,6 +274,7 @@ $(document).ready(function() {
                     $('#current-ticket-number').text(response.ticket_number ?? 'N/A');
                     $('#current-ticket-name').text(response.name ?? 'N/A');
 
+                    ticketNumber = response.ticket_number;
                     $('#next-ticket').prop('disabled', true).addClass('opacity-60'); 
                     $('#next-ticket-hold').prop('disabled', true).addClass('opacity-60');
 

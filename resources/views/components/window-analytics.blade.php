@@ -21,15 +21,15 @@
         <p>
             <strong>Average Queue Time (Overall):</strong> 
             <span title="The average duration users waited in the queue before their ticket was called, calculated across all time periods.">
-                <i class="fas fa-info-circle text-blue-500 mr-1" title="The average duration users waited in the queue before their ticket was called, calculated across all time periods."></i>
-                {{ gmdate('H:i:s', $analytics['averageQueueTime']['overall']) }}
+                <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                {{ $analytics['averageQueueTime']['formatted'] }}
             </span>
         </p>
         <p>
             <strong>Average Handle Time (Overall):</strong> 
             <span title="The average time taken to handle (complete) a ticket after it was called, calculated across all time periods.">
-                <i class="fas fa-info-circle text-blue-500 mr-1" title="The average time taken to handle (complete) a ticket after it was called, calculated across all time periods."></i>
-                {{ gmdate('H:i:s', $analytics['averageHandleTime']['overall']) }}
+                <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                {{ $analytics['averageHandleTime']['formatted'] }}
             </span>
         </p>
     </div>
@@ -38,6 +38,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script>
+    
 document.addEventListener('DOMContentLoaded', function () {
     const chartDom = document.getElementById('ticketsPerUserOverTimeChart');
     const userChart = echarts.init(chartDom);

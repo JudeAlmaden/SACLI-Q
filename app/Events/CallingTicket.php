@@ -24,15 +24,13 @@ class CallingTicket implements ShouldBroadcastNow
      *
      * @param string $queueId
      * @param int $ticketNumber
-     * @param string $windowName
      */
 
 
-    public function __construct($queueId, $ticketNumber, $windowName)
+    public function __construct($queueId, $ticketNumber)
     {
         $this->queueCode = $queueId;
         $this->ticketNumber = $ticketNumber;
-        $this->windowName = $windowName;
     }
 
 
@@ -50,7 +48,6 @@ class CallingTicket implements ShouldBroadcastNow
     {
         return [
             'ticketNumber' => $this->ticketNumber,
-            'windowName' => $this->windowName,
         ];
     }
 }

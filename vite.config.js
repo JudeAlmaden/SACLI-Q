@@ -13,11 +13,10 @@ export default defineConfig({
         port: 8880,
         strictPort: true,
         hmr:{
-            host:'192.168.0.102', //Change to your local IP address
+            host:'192.168.1.121', //Change to your local IP address
         }
     },
     input: [
-        // rest of your inputs
         'resources/js/app.js',
         'resources/js/echo.js',
         'resources/js/jquery.js',

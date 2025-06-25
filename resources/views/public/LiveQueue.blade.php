@@ -1,26 +1,10 @@
 <x-App>
-
-
   <x-slot name="content">
     <style>
-      #logo {
-        position: absolute !important;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 80%;
-        max-height: 80%;
-        pointer-events: none;
-        /* so it doesn't block clicks */
-        z-index: 0;
-        opacity: 0.15;
-        mix-blend-mode: multiply; /* Blend the image with the background to remove white */
-      }
-
       #windows-container {
         position: relative;
         overflow: hidden;
-        background-color: rgba(255, 255, 255, 0.0); /* white with 50% transparency */
+        background-color: rgba(255, 255, 255, 0);
       }
 
       #window-groups-list {
@@ -47,122 +31,54 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+        pointer-events: none;
       }
 
       .circles li {
         position: absolute;
         display: block;
         list-style: none;
-        width: 20px;
-        height: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        animation: animate 25s linear infinite;
-        left: -150px;
-      }
-
-      .circles li:nth-child(1) {
-        top: 25%;
-        width: 80px;
-        height: 80px;
-        animation-delay: 0s;
-      }
-
-      .circles li:nth-child(2) {
-        top: 10%;
-        width: 20px;
-        height: 20px;
-        animation-delay: 2s;
-        animation-duration: 12s;
-      }
-
-      .circles li:nth-child(3) {
-        top: 70%;
-        width: 20px;
-        height: 20px;
-        animation-delay: 4s;
-      }
-
-      .circles li:nth-child(4) {
-        top: 40%;
-        width: 60px;
-        height: 60px;
-        animation-delay: 0s;
-        animation-duration: 18s;
-      }
-
-      .circles li:nth-child(5) {
-        top: 65%;
-        width: 20px;
-        height: 20px;
-        animation-delay: 0s;
-      }
-
-      .circles li:nth-child(6) {
-        top: 75%;
-        width: 110px;
-        height: 110px;
-        animation-delay: 3s;
-      }
-
-      .circles li:nth-child(7) {
-        top: 35%;
-        width: 150px;
-        height: 150px;
-        animation-delay: 7s;
-      }
-
-      .circles li:nth-child(8) {
-        top: 50%;
-        width: 25px;
-        height: 25px;
-        animation-delay: 15s;
-        animation-duration: 45s;
-      }
-
-      .circles li:nth-child(9) {
-        top: 20%;
-        width: 15px;
-        height: 15px;
-        animation-delay: 2s;
-        animation-duration: 35s;
-      }
-
-      .circles li:nth-child(10) {
-        top: 85%;
-        width: 150px;
-        height: 150px;
-        animation-delay: 0s;
-        animation-duration: 11s;
+        background: rgba(255, 255, 100, 0.8);
+        animation: animate 30s linear infinite;
+        bottom: -150px;
       }
 
       @keyframes animate {
         0% {
-          transform: translateX(0) rotate(0deg);
+          transform: translate(0, 0) rotate(0deg);
           opacity: 1;
-          border-radius: 0;
         }
+
         100% {
-          transform: translateX(1000px) rotate(720deg);
-          opacity: 0.8; /* Increase opacity to make circles more noticeable */
-          border-radius: 50%;
+          transform: translate(-1000px, -1000px) rotate(720deg);
+          opacity: 0.6;
         }
       }
     </style>
+
+
 
     <!--Background Content-->
     <div class="context">
       <div class="area absolute top-0">
         <ul class="circles">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
+          @for ($i = 0; $i < 30; $i++)
+          @php
+        $size = rand(15, 100);
+        $duration = rand(10, 45);
+        $delay = rand(0, 20);
+        $right = rand(0, 95);
+        $rounded = rand(0, 10) < 3 ? 'border-radius: 10px;' : ''; // 30% chance to be rounded square
+      @endphp
+          <li style="
+          width: {{ $size }}px;
+          height: {{ $size }}px;
+          animation-delay: {{ $delay }}s;
+          animation-duration: {{ $duration }}s;
+          right: {{ $right }}%;
+          {{ $rounded }}
+        "></li>
+      @endfor
         </ul>
       </div>
     </div>
@@ -170,28 +86,54 @@
     <!--Main Content-->
     <div class="flex flex-wrap ">
       <div class="w-1/3">
-        <div class="grid grid-cols-1 gap-6 p-5 h-full">
+        <div class="grid grid-cols-1 gap-6 p-5 h-full relative">
           <!-- Window Groups Section -->
-          <div id="windows-container"
-            class="p-6 rounded-lg shadow-2xl flex flex-col h-full ">
-            <div id="window-groups-list" class="text-lg text-gray-600">
+          <div id="windows-container" class="p-6 rounded-lg shadow-2xl flex flex-col h-full relative card">
+            {{-- Header --}}
+            <div class="w-full flex items-center justify-between  bg-transparent">
+              <!-- Left Logo -->
+              <img src="/sacli_logo-remove-bg.png" alt="SACLI Logo" class="h-20 object-contain" />
+
+              <!-- Center Text -->
+              <div class="flex flex-col items-center text-gray-900">
+                <span class="text-xl font-bold tracking-wide text-center uppercase">
+                  Developed By
+                </span>
+                <span class="text-lg font-medium tracking-wider text-center text-gray-900">
+                  Bachelor of Science in Information Technology
+                </span>
+              </div>
+
+              <!-- Right Logo -->
+              <img src="/jpcs_logo-remove-bg.png" alt="JPCS Logo" class="h-20 object-contain" />
+            </div>
+
+            <hr class="my-5">
+
+            {{-- Live --}}
+            <div id="window-groups-list" class="text-lg text-gray-600 mt-5">
               Loading window groups...
             </div>
-            <img id="logo" src="{{ asset('/BSIT_Logo.jfif') }}" alt="Background" />
+
+            {{-- Footer --}}
+            <div class="absolute bottom-0 left-0 w-full z-20">
+              <div class="bg-black  text-white p-4 text-center rounded-lg">
+                Check your ticket at
+                <a href="{{ route('info') }}" class="text-blue-400 underline hover:text-blue-600 transition">
+                  {{ route('info') }}
+                </a>
+                to see your current status.
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="w-2/3">
-        <x-Carousel :queue="$queue"></x-Carousel>
-      </div>
+      <div class="w-2/3 relative p-5 h-screen">
+        <!-- Notification inside parent -->
 
-      <div class="fixed bottom-0 left-0 w-full">
-        <div class="bg-black bg-opacity-50 text-white p-4 text-center">
-          Check your ticket at <a href="{{ route('info') }}"
-            class="text-blue-400 underline hover:text-blue-600 transition">{{ route('info') }}</a> to see your current
-          status.
-        </div>
+        <!-- Carousel -->
+        <x-Carousel :queue="$queue" />
       </div>
 
 
@@ -212,10 +154,11 @@
           const windowsContainer = $('#window-groups-list');
           windowsContainer.empty(); // Clear existing content
           if (response.windows && response.windows.length > 0) {
+            console.log(response)
             response.windows.forEach(window => {
               const windowHtml = `
-                                <div class="mb-6 p-5 border border-gray-200 rounded-lg shadow-sm bg-gray-50 shadow-xl">
-                                  <h3 class="text-base font-medium text-gray-700 flex items-center mb-2">
+                                <div class="mb-6 p-5 border border-gray-200 rounded-lg shadow-sm bg-gray-50 shadow-xl ">
+                                  <h3 class="text-base font-medium text-gray-700 flex items-center mb-2 ">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                       <path fill-rule="evenodd" d="M9 3a7 7 0 1114 14A7 7 0 019 3zm0 1a6 6 0 10-.001 12.001A6 6 0 009 4z" clip-rule="evenodd" />
                                     </svg>
@@ -227,9 +170,8 @@
                                               ${window.issuedTickets
                     .map(ticket => `
                                                   <li>
-                                                    <div class="relative bg-white border border-green-200 rounded-lg shadow p-4 flex flex-col min-h-[80px]">
+                                                    <div class="shadow-md relative bg-white border border-green-200 rounded-lg shadow p-4 flex flex-col min-h-[80px]">
                                                       <div class="text-3xl font-extrabold text-green-700">${ticket.code}</div>
-                                                      <div class="absolute bottom-2 right-4 text-sm text-gray-500">Head to ${window.window_name}</div>
                                                     </div>
                                                   </li>
                                                 `)

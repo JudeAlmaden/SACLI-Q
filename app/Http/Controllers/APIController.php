@@ -179,12 +179,6 @@ class APIController extends Controller
                 'message' => 'You do not have access to this window.'
             ], 200);
 
-        }else if($userHasAccess->window_name == null && $userHasAccess->window_name == ''){
-            return response()->json([
-                'success'=>false, 
-                'message' => 'Please Enter your window name first'
-            ], 200);
-
         }else if($Ticket == null){
             return response()->json([
                 'success'=>false, 
@@ -266,12 +260,6 @@ class APIController extends Controller
                 'success'=>false, 
                 'message' => 'You do not have access to this window.
             '], 200);
-
-        }else if($userHasAccess->window_name == null && $userHasAccess->window_name == ''){
-            return response()->json([
-                'success'=>false, 
-                'message' => 'Please Enter your window name first'
-            ], 200);
 
         }else if($Ticket == null){
             return response()->json([
@@ -366,18 +354,6 @@ class APIController extends Controller
                 'success'=>false, 
                 'message' => 'You do not have access to this window.
             '], 200);
-
-        }else if($userHasAccess->window_name == null && $userHasAccess->window_name == ''){
-            return response()->json([
-                'success'=>false, 
-                'message' => 'Please Enter your window name first'
-            ], 200);
-
-        }else if($Ticket == null){
-            return response()->json([
-                'success'=>false, 
-                'message' => 'The ticket is no longer available.'
-            ], 200);
         }
         else{
             //Update Ticket Status
@@ -403,7 +379,7 @@ class APIController extends Controller
         $page = $request->input('page', 1);
         $perPage = $request->input('per_page', 20);
         $sortBy = $request->input('sort_by', 'created_at'); // Default sort column
-        $sortOrder = $request->input('sort_order', 'desc'); // Default sort order
+        $sortOrder = $request->input('sort_order', 'asc'); // Default sort order
 
         // Base query
         $query = Ticket::where('window_id', $WindowId)
@@ -432,36 +408,47 @@ class APIController extends Controller
     }
 
 
-    public function getUpcomingTickets($WindowId, Request $request) {
-        // Get pagination and sorting parameters
-        $perPage = $request->get('per_page', 20);
-        $sortBy = $request->get('sort_by', 'created_at'); // Default field to sort
-        $sortOrder = $request->get('sort_order', 'desc');
-        $search = $request->get('search');
+public function getUpcomingTickets($WindowId, Request $request) {
+    $perPage = $request->get('per_page', 20);
+    $sortBy = $request->get('sort_by', 'created_at');
+    $sortOrder = strtolower($request->get('sort_order', 'asc'));
+    $search = $request->get('search');
 
-        // Build base query
-        $query = Ticket::where('window_id', $WindowId)
-                    ->where('status', 'Waiting')
-                    ->whereDate('created_at', Carbon::today());
-
-        // Apply search if provided
-        if (!empty($search)) {
-            $query->where(function($q) use ($search) {
-                $q->where('code', 'like', "%$search%"); // Add more fields as needed
-            });
-        }
-
-        // Apply sorting and pagination
-        $tickets = $query->orderBy($sortBy, $sortOrder)
-                        ->paginate($perPage);
-
-        return response()->json([
-            'success' => true,
-            'tickets' => $tickets->items(),
-            'total_pages' => $tickets->lastPage(),
-            'current_page' => $tickets->currentPage(),
-        ]);
+    // Validate sort field (prevent invalid column injection)
+    $allowedSortFields = ['created_at', 'code', 'id']; // Add safe fields here
+    if (!in_array($sortBy, $allowedSortFields)) {
+        $sortBy = 'created_at';
     }
+
+    // Validate sort order
+    if (!in_array($sortOrder, ['asc', 'desc'])) {
+        $sortOrder = 'asc';
+    }
+
+    $query = Ticket::where('window_id', $WindowId)
+                ->where('status', 'Waiting')
+                ->whereDate('created_at', Carbon::today());
+
+    if (!empty($search)) {
+        $query->where(function($q) use ($search) {
+            $q->where('code', 'like', "%$search%");
+        });
+    }
+
+    // ✅ Apply sorting only once
+    $query->orderBy($sortBy, $sortOrder);
+
+    // Paginate
+    $tickets = $query->paginate($perPage);
+
+    return response()->json([
+        'success' => true,
+        'tickets' => $tickets->items(),
+        'total_pages' => $tickets->lastPage(),
+        'current_page' => $tickets->currentPage(),
+    ]);
+}
+
 
     // Get all Completed tickets with pagination
     public function getCompletedTickets($WindowId, Request $request) {
