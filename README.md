@@ -2,7 +2,6 @@
 Database>seeders>databaseSeeder
 
 # Resets the database
-php artisan db:fresh or
 php artisan migrate:fresh
 
 # Fills database with initial data

@@ -192,6 +192,7 @@ class PublicController extends Controller
         $validator = Validator::make($request->all(), [
             'queue_id' => 'required',
             'ticket_number' => 'required',
+            'window_name' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -205,9 +206,10 @@ class PublicController extends Controller
         // Store values
         $queue_id = $request->queue_id;
         $ticketNumber = $request->ticket_number;
-
+        $windowName = $request->window_name;
+        
         // Broadcast the event
-        broadcast(new CallingTicket($queue_id, $ticketNumber));
+        broadcast(new CallingTicket($queue_id, $ticketNumber,$windowName));
 
         // Return the broadcasted data as part of the success response
         return response()->json([

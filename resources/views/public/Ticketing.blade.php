@@ -1,26 +1,37 @@
 <!-- filepath: /d:/XAMPP/htdocs/SACLIQueue/resources/views/Ticketing.blade.php -->
 <x-App>
     <x-slot name="content">
-        <div class="bg-gray-50 min-h-screen flex items-center justify-center px-6 lg:px-0">
-            <div class="p-12 border border-gray-200 rounded-xl bg-white shadow-lg w-full lg:w-1/2">
-                <h1 class="text-5xl font-extrabold text-green-400 text-center mb-4"> Get Your Ticket</h1>
-                <p class="text-lg text-gray-600 text-center mb-8">
-                    Welcome to the {{ $queue->name }}! Let’s make your experience hassle-free.
-                </p>
+        <div class="justify-center flex px-12 py-6 bg-gray-300 min-h-screen">
+        {{-- <div class="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+           
+        </div> --}}
+
+        <div class=" flex items-center justify-center lg:px-0" style="width: 100%">
+            <div class="border border-gray-200 rounded-xl bg-white shadow-lg w-full xl:w-1/2 p-12">
                 
+            <h1 class="text-4xl sm:text-5xl font-black text-green-500 text-center mb-3 tracking-tight">
+            Claim Your Queue Ticket
+            </h1>
+            <p class="text-base sm:text-lg text-gray-800 dark:text-gray-800 text-center max-w-2xl mx-auto mb-8">
+            You're joining <span class="font-semibold text-gray-800">{{ $queue->name }}</span> — let's make this smooth and easy!
+            </p>
+
                 <div>
                     @if ($queue->windows->isNotEmpty())
                         <form action="{{ route('ticketing.submit') }}" method="POST" class="space-y-8">
                             @csrf
                             <input type="hidden" name="queue_id" value="{{ $queue->id }}">
                             <fieldset>
-                                <legend class="block text-xl lg:text-2xl font-medium text-gray-800 mb-4 text-center">Choose where to queue:</legend>
-                                <div class="flex flex-wrap gap-6 justify-center">
+                                <legend class="block text-xl lg:text-2xl font-medium text-gray-800 mb-4 text-center"> <strong>Click</strong> here to Choose where to queue:</legend>
+                                
+                                <div class="flex flex-wrap gap-6 justify-center w-100%">
                                     @foreach ($queue->windows as $window)
-                                        <div class="flex items-center w-full md:w-1/4 window-selection-item" data-description="{{ $window->description }}">
+                                        <div class="flex items-center w-1/4 window-selection-item" data-description="{{ $window->description }}">
                                             <input id="windows_group_{{ $window->id }}" name="window_id" type="radio" value="{{ $window->id }}" class="hidden peer"  {{ $window->status === 'closed' ? 'disabled' : '' }}>
                                             <label for="windows_group_{{ $window->id }}" 
-                                                   class="peer-checked:bg-indigo-100 peer-checked:border-indigo-600 peer-checked:shadow-md transition-all cursor-pointer flex items-center justify-center w-full h-40 px-8 py-6 {{ $window->status === 'closed' ? 'bg-gray-200 border-gray-400 text-gray-500 cursor-not-allowed' : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200' }} text-3xl font-bold rounded-lg">
+                                                class="peer-checked:bg-green-700 peer-checked:text-white peer-checked:border-green-900 peer-checked:shadow-md 
+                                                border border-gray-300 hover:border-gray-400
+                                                transition-all cursor-pointer flex items-center justify-center w-full h-40 px-8 py-6 {{ $window->status === 'closed' ? 'bg-gray-200 border-gray-400 text-gray-500 cursor-not-allowed' : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200' }} text-3xl font-bold rounded-lg">
                                                 {{ $window->name }}
                                                 @if ($window->status === 'closed')
                                                     <span class="block text-sm text-red-500 mt-2">Not Available</span>
@@ -33,19 +44,19 @@
                             </fieldset>
 
                             <!-- Description -->
-                            <div id="description" class="mt-4 p-4 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 text-lg">
-                                <strong>Hint:</strong> Select an item above to see details here.
+                            <div id="description" class="mt-4 p-4 bg-green-200 border border-gray-300 rounded-lg text-gray-600 text-lg">
+                                <strong>Hint:</strong> Click an item above to see details here.
                             </div>
 
                             <!-- Name Input -->
                             <div>
                                 <label for="name" class="block text-lg font-medium text-gray-800 mb-2">Student Name</label>
-                                <input type="text" id="name" name="name" required placeholder="e.g., Mark Vincent" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
+                                <input type="text" id="name" name="name" required placeholder="e.g., Mark Vincent" class="mt-1 block w-full px-4 py-3 border border-gray-800 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
                             </div>
 
                             <!-- Submit Button -->
                             <div class="flex justify-center">
-                                <button type="submit" class="w-full lg:w-auto px-8 py-4 bg-green-500 text-white text-lg font-bold rounded-lg shadow hover:bg-indigo-600 transition-all">
+                                <button type="submit" class="w-full lg:w-auto px-8 py-4 bg-green-900 hover:margin-bottom-6 transition-all text-white text-lg font-bold rounded-lg shadow hover:bg-indigo-600 transition-all">
                                     Get My Ticket
                                 </button>
                             </div>
@@ -57,6 +68,7 @@
                     @endif
                 </div>
             </div>
+        </div>
         </div>
         <x-ErrorAlert></x-ErrorAlert>
     </x-slot>

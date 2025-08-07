@@ -18,7 +18,7 @@
                 </div>
                 
                 <div class="flex justify-center mt-8">
-                    <a href="{{ route('ticketing', ['code' => $Queue->code]) }}" class="px-8 py-4 bg-indigo-600 text-white text-lg font-bold rounded-lg shadow hover:bg-indigo-700 transition-all">
+                    <a href="{{ route('ticketing', ['code' => $Queue->code]) }}" class="px-8 py-4 bg-green-700 text-white text-lg font-bold rounded-lg shadow hover:bg-indigo-700 transition-all">
                         Back to Ticketing
                     </a>
                 </div>

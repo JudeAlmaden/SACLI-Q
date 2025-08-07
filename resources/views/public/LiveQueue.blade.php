@@ -172,6 +172,7 @@
                                                   <li>
                                                     <div class="shadow-md relative bg-white border border-green-200 rounded-lg shadow p-4 flex flex-col min-h-[80px]">
                                                       <div class="text-3xl font-extrabold text-green-700">${ticket.code}</div>
+                                                       <div class="absolute bottom-2 right-4 text-sm text-gray-500">${window.window_name}</div>
                                                     </div>
                                                   </li>
                                                 `)
@@ -233,30 +234,21 @@
             video.volume = 0.1;  // or any low volume you prefer
           });
 
-          function textToSpeech(text) {
-            if ('speechSynthesis' in window) {
-              const utterance = new SpeechSynthesisUtterance(text);
-              utterance.lang = 'en-US';
-
-              utterance.onend = () => {
-                // Restore original volumes when speech ends
-                videos.forEach((video, i) => {
-                  video.volume = originalVolumes[i];
-                });
-              };
-
-              speechSynthesis.speak(utterance);
-            } else {
-              console.error('Text-to-speech is not supported in this browser.');
-              // Restore volumes if TTS not supported
+                // Usage
+          speakTicketNumber(e.ticketNumber, e.windowName)
+            .then(() => {
+              // Restore original volumes after speaking
               videos.forEach((video, i) => {
                 video.volume = originalVolumes[i];
               });
-            }
-          }
-
-          // Usage
-          speakTicketNumber(e.ticketNumber);
+            })
+            .catch(error => {
+              console.error("Error speaking ticket number:", error);
+              // Restore original volumes in case of error
+              videos.forEach((video, i) => {
+                video.volume = originalVolumes[i];
+              });
+            });
 
         }, 2000);
       });
@@ -272,11 +264,12 @@
       });
     }
 
-    async function speakTicketNumber(ticketNumber) {
+    async function speakTicketNumber(ticketNumber, windowName) {
       await playDingDong();
 
       const msg = new SpeechSynthesisUtterance();
-      msg.text = `Calling ticket number ${ticketNumber}`;
+      msg.text = `Calling ticket number ${ticketNumber} to go to ${windowName}`;
+      console.log("Speaking:", msg.text);
       const voices = window.speechSynthesis.getVoices();
       msg.voice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google')) || voices[0];
       msg.rate = 0.9;

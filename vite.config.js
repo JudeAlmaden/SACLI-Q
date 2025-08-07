@@ -13,7 +13,7 @@ export default defineConfig({
         port: 8880,
         strictPort: true,
         hmr:{
-            host:'192.168.1.121', //Change to your local IP address
+            host:'192.168.1.121', //Testing
         }
     },
     input: [

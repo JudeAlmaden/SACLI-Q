@@ -60,6 +60,7 @@ return new class extends Migration
             $table->foreignId('queue_id')->constrained('queues')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('window_id')->constrained('windows')->onDelete('cascade');            
+            $table->string('window_name')->nullable(); 
             $table->boolean('can_close_own_window')->default(false);
             $table->boolean('can_close_any_window')->default(false);
             $table->boolean('can_close_queue')->default(false);

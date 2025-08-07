@@ -24,6 +24,57 @@
             </div>
             </header>
 
+            
+            <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
+                <div class="grid grid-cols-1 gap-3">
+                    <!-- window Input Section -->
+                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
+                        <form id="window-form" class="space-y-6">
+                            <div class="flex items-center space-x-4">
+                                <label for="window-name" class="w-12/12 block font-medium text-green-700">
+                                    Window Name:
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="window-name" 
+                                    name="window_name" 
+                                    placeholder="{{ $windowAccess->window_name ?? 'Ex: Window 1' }}"
+                                    class="flex-grow w-9/12 px-3 py-2 border border-green-400 focus:border-green-600 focus:ring-green-500 bg-white text-green-900 rounded-md"
+                                >
+                                <button type="submit" class="p-2 w-3/12 bg-green-600 text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-md">
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Combined Description Section -->
+                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
+                        <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
+                            <h2 class="text-xl font-bold mb-2">Number of tickets left: <span id="upcoming-tickets-count" class="text-2xl font-semibold"></span></h2>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="grid grid-cols-1">
+                    <!-- Currently Handling Section -->
+                    <section class="p-8 bg-white border-2 border-green-600 rounded-lg shadow-lg">
+                        <h2 class="text-4xl font-extrabold text-green-800 mb-6 text-center">Currently Handling</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-2xl">
+                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
+                                <strong class="block">Ticket:</strong> 
+                                <span id="current-ticket-number" class="font-semibold text-green-600">N/A</span>
+                            </p>
+                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
+                                <strong class="block">Name:</strong> 
+                                <span id="current-ticket-name" class="font-semibold text-green-600">N/A</span>
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+
             <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
                 <div class="grid grid-cols-1 gap-3">
                     <!-- Combined Description Section -->
@@ -119,33 +170,33 @@ $(document).ready(function() {
 
     var ticketNumber = null
     //Updating Window name
-    // $('#window-form').on('submit', function (e) {
-    //     e.preventDefault();
+    $('#window-form').on('submit', function (e) {
+        e.preventDefault();
 
-    //     const windowId = {{ $window->id ?? 'null' }};
-    //     const windowName = $('#window-name').val();
+      const windowId = {{ $window->id ?? 'null' }};
+         const windowName = $('#window-name').val();
 
-    //     $.ajax({
-    //         url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
-    //         method: 'POST',
-    //         data: {
-    //             window_name: windowName,
-    //             _token: '{{ csrf_token() }}'
-    //         },
-    //         success: function (response) {
-    //             if (response.success) {
-    //                 location.reload();
-    //                 alert(response.message);
-    //             } else {
-    //                 alert(response.message);
-    //             }
-    //         },
-    //         error: function (xhr, status, error) {
-    //             console.error('Error:', error);
-    //             alert('An error occurred while updating the window.');
-    //         }
-    //     });
-    // });
+         $.ajax({
+             url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
+             method: 'POST',
+            data: {
+               window_name: windowName,
+                _token: '{{ csrf_token() }}'
+             },
+             success: function (response) {
+                 if (response.success) {
+                     location.reload();
+                     alert(response.message);
+                 } else {
+                     alert(response.message);
+                 }
+             },
+             error: function (xhr, status, error) {
+                 console.error('Error:', error);
+                 alert('An error occurred while updating the window.');
+             }
+         });
+     });
 
     //Control Buttons
     $('#next-ticket').on('click', function(event) {
@@ -240,6 +291,7 @@ $(document).ready(function() {
             url: "{{ route('broadcast.callTicket.event') }}", // no need for route parameters
             method: 'POST',
             data: {
+                window_name: "{{ $windowAccess->window_name}}",
                 ticket_number: ticketNumber,  
                 queue_id: "{{ $window->queue_id}}", //queue code is alias for queueID
                 _token: "{{ csrf_token() }}"  

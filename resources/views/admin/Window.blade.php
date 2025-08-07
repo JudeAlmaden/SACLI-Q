@@ -30,7 +30,7 @@
                             <select id="user_id" name="user_id" class="w-full p-2 border rounded">
                                 @foreach ($allUsers as $user)
                                     @if (!$users->contains($user))
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->account_id }})</option>
                                     @endif
                                 @endforeach
                             </select>
@@ -57,7 +57,7 @@
                                 <tbody>
                                     @foreach ($users as $user)
                                         <tr class="border-t">
-                                            <td class="p-3 text-sm">{{ $user->name }}</td>
+                                            <td class="p-3 text-sm">{{ $user->name }} ({{$user->account_id}})</td>
                                             <td class="p-3 text-sm">
                                                 <form
                                                     action="{{ route('admin.window.user.remove', ['id' => $window->id, 'user_id' => $user->id]) }}"
