@@ -5,84 +5,79 @@
 
 <div>
     <aside id="default-sidebar"
-        class="shadow-lg fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 px-3  bg-[#f8f9fa]"
+        class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-white border-r border-gray-200 shadow-sm"
         aria-label="Sidebar">
 
-        <div class="mt-24">
-            <a href="{{ route('dashboard') }}"
-                class="group flex items-center px-4 py-3 text-sm text-black rounded hover:bg-[#e5ffc2]  hover:text-green-900 transform hover:transition-all duration-700 ease-in-out">
-                <span
-                    class="material-symbols-outlined mr-4 group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out"
-                    style="font-variation-settings: 'wght' 300;">
-                    dashboard
-                </span>
-                <span class="group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out">Homepage</span>
-            </a>
-        </div>
+        <div class="flex flex-col h-full overflow-y-auto py-6 px-3">
+            <!-- Logo area or top spacing -->
+            <div class="mb-8 px-2 flex items-center">
+                 <span class="text-2xl font-bold text-green-700 tracking-tight">Sacli-Q</span>
+            </div>
 
-        
-        @if(session('access_type') === 'admin')
-            <h2 class="mt-[20px] ml-5 font-bold text-base">Admin</h2>
-            <ul class="mt-1">
+            <ul class="space-y-2">
                 <li>
-                    <a href="{{route('user.list')}}"
-                        class="group flex items-center px-4 py-3 text-sm text-black rounded hover:bg-[#e5ffc2] hover:text-green-900 transform hover:transition-all duration-700 ease-in-out">
-                        <span
-                            class="group material-symbols-outlined mr-4 group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out"
-                            style="font-variation-settings: 'wght' 300;">
-                            account_circle
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-green-50 group transition duration-200 {{ request()->routeIs('dashboard') ? 'bg-green-100 text-green-700' : '' }}">
+                        <span class="material-symbols-outlined text-gray-500 group-hover:text-green-700 transition duration-200 {{ request()->routeIs('dashboard') ? 'text-green-700' : '' }}">
+                            dashboard
                         </span>
-                        <span class="group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out">Manage
-                            Users</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{route('admin.queue.list')}}"
-                        class="group flex items-center px-4 py-3 text-sm text-black rounded hover:bg-[#e5ffc2] hover:text-green-900 transform hover:transition-all duration-700 ease-in-out">
-                        <span
-                            class="group material-symbols-outlined mr-4 group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out"
-                            style="font-variation-settings: 'wght' 300;">
-                            schedule
-                        </span>
-                        <span class="group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out">Queues</span>
+                        <span class="ml-3 font-medium">Homepage</span>
                     </a>
                 </li>
             </ul>
-        @endif
 
-        <h2 class="mt-[30px] ml-5 font-bold text-normal">Information</h2>
-        <ul class="mt-1">
+            @if(session('access_type') === 'admin')
+                <div class="mt-8 mb-2 px-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</h3>
+                </div>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{{route('user.list')}}"
+                            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-green-50 group transition duration-200 {{ request()->routeIs('user.list') ? 'bg-green-100 text-green-700' : '' }}">
+                            <span class="material-symbols-outlined text-gray-500 group-hover:text-green-700 transition duration-200 {{ request()->routeIs('user.list') ? 'text-green-700' : '' }}">
+                                account_circle
+                            </span>
+                            <span class="ml-3 font-medium">Manage Users</span>
+                        </a>
+                    </li>
 
-            <li>
-                <a href="{{route('myQueues')}}"
-                    class="group flex items-center px-4 py-3 text-sm text-black rounded hover:bg-[#e5ffc2] hover:text-green-900 transform hover:transition-all duration-700 ease-in-out">
-                    <span
-                        class="group material-symbols-outlined mr-4 group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out"
-                        style="font-variation-settings: 'wght' 300;">
-                        edit_note
-                    </span>
-                    <span class="group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out">My Assigned
-                        Queues and Windows</span>
-                </a>
-            </li>
+                    <li>
+                        <a href="{{route('admin.queue.list')}}"
+                            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-green-50 group transition duration-200 {{ request()->routeIs('admin.queue.list') ? 'bg-green-100 text-green-700' : '' }}">
+                            <span class="material-symbols-outlined text-gray-500 group-hover:text-green-700 transition duration-200 {{ request()->routeIs('admin.queue.list') ? 'text-green-700' : '' }}">
+                                schedule
+                            </span>
+                            <span class="ml-3 font-medium">Queues</span>
+                        </a>
+                    </li>
+                </ul>
+            @endif
 
-        </ul>
+            <div class="mt-8 mb-2 px-2">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Information</h3>
+            </div>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{route('myQueues')}}"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-green-50 group transition duration-200 {{ request()->routeIs('myQueues') ? 'bg-green-100 text-green-700' : '' }}">
+                        <span class="material-symbols-outlined text-gray-500 group-hover:text-green-700 transition duration-200 {{ request()->routeIs('myQueues') ? 'text-green-700' : '' }}">
+                            edit_note
+                        </span>
+                        <span class="ml-3 font-medium">My Assigned Queues</span>
+                    </a>
+                </li>
+            </ul>
 
-        <div class="mt-[40px]">
-            <h2 class="mt-[30px] ml-5 font-bold text-normal">Actions</h2>
-
-            <ul class="mt-4">
+            <div class="mt-auto pt-8 border-t border-gray-200">
                 <a href="{{route('logout')}}"
-                    class="group flex items-center px-4 py-3 text-sm text-black rounded hover:bg-[#ffd7d7] hover:text-green-900 transform hover:transition-all duration-700 ease-in-out">
-                    <span
-                        class="group material-symbols-outlined mr-4 group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out"
-                        style="font-variation-settings: 'wght' 300;">
+                    class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-red-50 group transition duration-200">
+                    <span class="material-symbols-outlined text-gray-500 group-hover:text-red-600 transition duration-200">
                         power_settings_new
                     </span>
-                    <span class="group-hover:-translate-x-[-7px] transition-all duration-700 ease-in-out">Log out</span>
+                    <span class="ml-3 font-medium group-hover:text-red-600 transition duration-200">Log out</span>
                 </a>
-        </div>
+            </div>
 
+        </div>
     </aside>
 </div>

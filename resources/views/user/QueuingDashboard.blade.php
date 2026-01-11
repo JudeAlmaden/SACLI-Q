@@ -1,165 +1,129 @@
 <!-- filepath: /d:/XAMPP/htdocs/SACLIQueue/resources/views/QueuingDashboard.blade.php -->
 <x-Dashboard>
     <x-slot name="content">
-
         <style>
-            .control-buttons button {
-                transition: transform 0.3s ease, background-color 0.3s ease;
-                height:  150px; /* Set a fixed height for all buttons */
-                font-size: 1.2rem; /* Increase font size for better visibility */
+            .control-btn {
+                transition: all 0.2s ease;
+            }
+            .control-btn:active {
+                transform: scale(0.98);
             }
         </style>
 
-        <div class="mt-16 p-6 sm:ml-64 bg-white min-h-screen rounded-lg shadow-lg">
-            <!-- Header Section -->
-            <header class="mb-8">
-            <div class="flex items-center space-x-4">
-                <i class="fas fa-window-maximize text-4xl text-green-600"></i>
-                <div>
-                <h1 class="text-4xl font-extrabold text-green-800">{{ $window->name }}</h1>
-                <p class="text-md text-green-700">
-                   <span class="font-semibold">{{ $window->queue->name }}</span>
-                </p>
-                </div>
-            </div>
-            </header>
-
+        <div class="mt-16 p-6 sm:ml-64 bg-gray-50 min-h-screen">
             
-            <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
-                <div class="grid grid-cols-1 gap-3">
-                    <!-- window Input Section -->
-                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
-                        <form id="window-form" class="space-y-6">
-                            <div class="flex items-center space-x-4">
-                                <label for="window-name" class="w-12/12 block font-medium text-green-700">
-                                    Window Name:
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="window-name" 
-                                    name="window_name" 
-                                    placeholder="{{ $windowAccess->window_name ?? 'Ex: Window 1' }}"
-                                    class="flex-grow w-9/12 px-3 py-2 border border-green-400 focus:border-green-600 focus:ring-green-500 bg-white text-green-900 rounded-md"
-                                >
-                                <button type="submit" class="p-2 w-3/12 bg-green-600 text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-md">
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <!-- Combined Description Section -->
-                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
-                        <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
-                            <h2 class="text-xl font-bold mb-2">Number of tickets left: <span id="upcoming-tickets-count" class="text-2xl font-semibold"></span></h2>
-                        </div>
-                    </section>
+            <!-- Top Controls & Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 p-3 rounded-lg text-green-700">
+                        <i class="fas fa-window-maximize text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ $window->name }}</h1>
+                        <p class="text-sm text-gray-500">Queue: <span class="font-semibold text-green-700">{{ $window->queue->name }}</span></p>
+                    </div>
                 </div>
-                
-                <div class="grid grid-cols-1">
-                    <!-- Currently Handling Section -->
-                    <section class="p-8 bg-white border-2 border-green-600 rounded-lg shadow-lg">
-                        <h2 class="text-4xl font-extrabold text-green-800 mb-6 text-center">Currently Handling</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-2xl">
-                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
-                                <strong class="block">Ticket:</strong> 
-                                <span id="current-ticket-number" class="font-semibold text-green-600">N/A</span>
-                            </p>
-                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
-                                <strong class="block">Name:</strong> 
-                                <span id="current-ticket-name" class="font-semibold text-green-600">N/A</span>
-                            </p>
+
+                <!-- Window Name Edit (Compact) -->
+                <form id="window-form" class="flex items-center bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm md:w-auto w-full">
+                    <input 
+                        type="text" 
+                        id="window-name" 
+                        name="window_name" 
+                        placeholder="{{ $windowAccess->window_name ?? 'Rename Window...' }}"
+                        class="border-none focus:ring-0 text-sm md:w-48 w-full"
+                    >
+                    <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-md text-sm font-medium transition-colors">
+                        Save
+                    </button>
+                </form>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Currently Handling (Big Card) -->
+                <div class="md:col-span-1 bg-white rounded-xl shadow-sm border border-green-200 p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i class="fas fa-bullhorn text-6xl text-green-700"></i>
+                    </div>
+                    <h3 class="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Currently Serving</h3>
+                    <div class="mt-4">
+                        <div class="flex items-baseline space-x-2">
+                             <span class="text-gray-400 text-lg">#</span>
+                             <span id="current-ticket-number" class="text-5xl font-extrabold text-green-700 tracking-tight">--</span>
                         </div>
-                    </section>
+                        <p id="current-ticket-name" class="mt-2 text-lg font-medium text-gray-700 truncate min-h-[1.75rem]">
+                            Waiting for ticket...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 gap-4 md:col-span-2">
+                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                        <span class="text-sm font-medium text-gray-500">Tickets Waiting</span>
+                        <span id="upcoming-tickets-count" class="text-3xl font-bold text-gray-900 mt-2">--</span>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                        <span class="text-sm font-medium text-gray-500">Tickets Handled</span>
+                        <span id="completed-tickets-count" class="text-3xl font-bold text-gray-900 mt-2">--</span>
+                    </div>
                 </div>
             </div>
 
+            <!-- Main Actions -->
+            <div class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <button id="next-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                        <i class="fa-solid fa-play text-2xl mb-2"></i>
+                        <span class="font-bold">Next Ticket</span>
+                    </button>
 
-            <div class="grid grid-rows-1 grid-cols-2 gap-x-3">
-                <div class="grid grid-cols-1 gap-3">
-                    <!-- Combined Description Section -->
-                    <section class="p-6 bg-white border border-green-300 rounded-lg shadow-md">
-                        <div class="p-4 bg-green-600 text-white rounded-lg shadow-lg">
-                            <h2 class="text-xl font-bold mb-2">Number of tickets left: <span id="upcoming-tickets-count" class="text-2xl font-semibold"></span></h2>
-                              <h2 class="text-xl font-bold mb-2">Number of tickets handled: <span id="completed-tickets-count" class="text-2xl font-semibold"></span></h2>
-                        </div>
-                    </section>
-                </div>
-                
-                <div class="grid grid-cols-1">
-                    <!-- Currently Handling Section -->
-                    <section class="p-8 bg-white border-2 border-green-600 rounded-lg shadow-lg">
-                        <h2 class="text-4xl font-extrabold text-green-800 mb-6 text-center">Currently Handling</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-2xl">
-                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
-                                <strong class="block">Ticket:</strong> 
-                                <span id="current-ticket-number" class="font-semibold text-green-600">N/A</span>
-                            </p>
-                            <p class="w-full flex items-center justify-between text-green-800 bg-green-50 p-4 rounded-md shadow-md">
-                                <strong class="block">Name:</strong> 
-                                <span id="current-ticket-name" class="font-semibold text-green-600">N/A</span>
-                            </p>
-                        </div>
-                    </section>
+                    <button id="call-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                        <i class="fa-solid fa-volume-high text-2xl mb-2"></i>
+                        <span class="font-bold">Call Again</span>
+                    </button>
+
+                    <button id="hold-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                         <i class="fa-solid fa-pause text-2xl mb-2"></i>
+                        <span class="font-bold">Put on Hold</span>
+                    </button>
+
+                     <button id="next-ticket-hold" class="control-btn flex flex-col items-center justify-center p-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                         <i class="fa-solid fa-clock-rotate-left text-2xl mb-2"></i>
+                        <span class="font-bold">Call from Hold</span>
+                    </button>
+
+                    <button id="complete-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                         <i class="fa-solid fa-check text-2xl mb-2"></i>
+                        <span class="font-bold">Complete</span>
+                    </button>
                 </div>
             </div>
 
-
-            <!-- Actions Section -->   
-            <section class="mt-6 p-6 bg-white border border-gray-300 0 rounded-lg border-green-300 r shadow-md">
-                <h2 class="text-xl font-bold text-gray-800  mb-4">Actions</h2>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 control-buttons">
-                    <button 
-                        id="next-ticket"
-                        class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
-                        title="Move to the next ticket in the queue">
-                        <i class="fa-solid fa-play w-5 h-5 flex items-center justify-center"></i>
-                        <span class="whitespace-nowrap">Get Next Ticket</span>
-                    </button>
-                    
-                    <button 
-                        id="next-ticket-hold"
-                        class="flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
-                        title="Get a ticket that is on hold">
-                        <i class="fa-solid fa-clock w-5 h-5 flex items-center justify-center"></i>
-                        <span class="whitespace-nowrap">Get from hold</span>
-                    </button>
-                    
-                    <button 
-                        id="complete-ticket"
-                        class="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
-                        title="Mark the current ticket as completed">
-                        <i class="fa-solid fa-check w-5 h-5 flex items-center justify-center"></i>
-                        <span class="whitespace-nowrap">Complete</span>
-                    </button>
-                    
-                    <button 
-                        id="hold-ticket"
-                        class="flex items-center justify-center space-x-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
-                        title="Put the current ticket on hold">
-                        <i class="fa-solid fa-pause w-5 h-5 flex items-center justify-center"></i>
-                        <span class="whitespace-nowrap">Put on hold</span>
-                    </button>
-                    
-                    <button 
-                        id="call-ticket"
-                        class="flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded shadow-lg relative group transition duration-300 ease-in-out transform hover:scale-105"
-                        title="Call the current ticket to the window">
-                        <i class="fa-solid fa-volume-high w-5 h-5 flex items-center justify-center"></i>
-                        <span class="whitespace-nowrap">Call</span>
-                    </button>
+            <!-- Tables Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[500px] flex flex-col">
+                    <div class="flex-1 overflow-auto p-2">
+                         <x-TableUpcomingTickets :window="$window" />
+                    </div>
                 </div>
-            </section>
 
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[500px] flex flex-col">
+                    <div class="flex-1 overflow-auto p-2">
+                        <x-TableOnHoldTickets :window="$window" />
+                    </div>
+                </div>
 
-
-            <!-- Add HTML elements to display the tickets -->
-            <div class="mt-10 grid grid-cols-2 gap-6">
-                {{-- Passing the $Window from controller as prop --}}
-                <x-TableOnHoldTickets :window="$window" />
-                <x-TableUpcomingTickets :window="$window" />
-                <x-TableCompletedTickets :window="$window" />
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[500px] flex flex-col">
+                    <div class="flex-1 overflow-auto p-2">
+                        <x-TableCompletedTickets :window="$window" />
+                    </div>
+                </div>
             </div>
+
         </div>
     </x-slot>
 </x-Dashboard>
@@ -179,7 +143,7 @@ $(document).ready(function() {
          $.ajax({
              url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
              method: 'POST',
-            data: {
+             data: {
                window_name: windowName,
                 _token: '{{ csrf_token() }}'
              },
@@ -288,12 +252,12 @@ $(document).ready(function() {
         event.preventDefault();
 
         $.ajax({
-            url: "{{ route('broadcast.callTicket.event') }}", // no need for route parameters
+            url: "{{ route('broadcast.callTicket.event') }}", 
             method: 'POST',
             data: {
                 window_name: "{{ $windowAccess->window_name}}",
                 ticket_number: ticketNumber,  
-                queue_id: "{{ $window->queue_id}}", //queue code is alias for queueID
+                queue_id: "{{ $window->queue_id}}", 
                 _token: "{{ csrf_token() }}"  
             },
             success: function(response) {
@@ -324,38 +288,37 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     $('#current-ticket-number').text(response.ticket_number ?? 'N/A');
-                    $('#current-ticket-name').text(response.name ?? 'N/A');
+                    $('#current-ticket-name').text(response.name ?? 'waiting for ticket...');
 
                     ticketNumber = response.ticket_number;
-                    $('#next-ticket').prop('disabled', true).addClass('opacity-60'); 
-                    $('#next-ticket-hold').prop('disabled', true).addClass('opacity-60');
+                    $('#next-ticket').prop('disabled', true).addClass('opacity-60 cursor-not-allowed bg-blue-300').removeClass('bg-blue-600 hover:bg-blue-700'); 
+                    $('#next-ticket-hold').prop('disabled', true).addClass('opacity-60 cursor-not-allowed bg-indigo-300').removeClass('bg-indigo-500 hover:bg-indigo-600');
 
-                    $('#complete-ticket').prop('disabled', false).removeClass('opacity-60');
-                    $('#hold-ticket').prop('disabled', false).removeClass('opacity-60');
-                    $('#call-ticket').prop('disabled', false).removeClass('opacity-60');
+                    $('#complete-ticket').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed bg-green-300').addClass('bg-green-600 hover:bg-green-700');
+                    $('#hold-ticket').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed bg-orange-300').addClass('bg-orange-500 hover:bg-orange-600');
+                    $('#call-ticket').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed bg-teal-300').addClass('bg-teal-600 hover:bg-teal-700');
                 } else {
-                    $('#current-ticket-number').text('N/A');
-                    $('#current-ticket-name').text('N/A');
+                    $('#current-ticket-number').text('--');
+                    $('#current-ticket-name').text('Waiting for ticket...');
                     
-                    $('#next-ticket').prop('disabled', false).removeClass('opacity-60'); 
-                    $('#next-ticket-hold').prop('disabled', false).removeClass('opacity-60');
+                    $('#next-ticket').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed bg-blue-300').addClass('bg-blue-600 hover:bg-blue-700'); 
+                    $('#next-ticket-hold').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed bg-indigo-300').addClass('bg-indigo-500 hover:bg-indigo-600');
 
-                    $('#complete-ticket').prop('disabled', true).addClass('opacity-60');
-                    $('#hold-ticket').prop('disabled', true).addClass('opacity-60');
-                    $('#call-ticket').prop('disabled', true).addClass('opacity-60');
+                    $('#complete-ticket').prop('disabled', true).addClass('opacity-60 cursor-not-allowed bg-green-300').removeClass('bg-green-600 hover:bg-green-700');
+                    $('#hold-ticket').prop('disabled', true).addClass('opacity-60 cursor-not-allowed bg-orange-300').removeClass('bg-orange-500 hover:bg-orange-600');
+                    $('#call-ticket').prop('disabled', true).addClass('opacity-60 cursor-not-allowed bg-teal-300').removeClass('bg-teal-600 hover:bg-teal-700');
                 }
             },
             error: function(xhr, status, error) {
-                $('#next-ticket').prop('disabled', false).removeClass('opacity-60'); 
-                $('#next-ticket-hold').prop('disabled', false).removeClass('opacity-60');
+                $('#next-ticket').prop('disabled', false); 
+                $('#next-ticket-hold').prop('disabled', false);
 
-                $('#complete-ticket').prop('disabled', true).addClass('opacity-60');
-                $('#hold-ticket').prop('disabled', true).addClass('opacity-60');
-                $('#call-ticket').prop('disabled', true).addClass('opacity-60');
+                $('#complete-ticket').prop('disabled', true);
+                $('#hold-ticket').prop('disabled', true);
+                $('#call-ticket').prop('disabled', true);
 
                 $('#current-ticket-number').text('N/A');
                 $('#current-ticket-name').text('N/A');
-                alert("Error while fetching current tickets");
             }
         });
     }
@@ -393,7 +356,6 @@ $(document).ready(function() {
     Echo.channel('live-queue.{{$window->queue_id}}')
     .listen('NewTicketEvent', () => {
         
-        // Add a timeout before calling getLiveData
         setTimeout(() => {
         getWindowUserData();
         getUpcomingTickets(upcomingTicketsPage);

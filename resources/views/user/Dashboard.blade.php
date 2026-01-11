@@ -1,33 +1,70 @@
 <x-Dashboard>
     <x-slot name="content">
-        <div class="mt-8 p-4 sm:ml-64 min-h-screen relative">
-            <!-- Blurred Background Image -->
-            <div 
-                class="absolute inset-0 w-full h-full z-0 overflow-hidden"
-            >
-                <div 
-                    class="absolute inset-0 scale-110 bg-cover bg-center blur-[12px] brightness-75"
-                    style="background-image: url('https://scontent.fmnl13-1.fna.fbcdn.net/v/t1.6435-9/59611518_2172312856215167_7931959178644422656_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeHA2eXAq71QUtqC6T7fmoJJWWEgMYZI495ZYSAxhkjj3rqJGcu18Zxgs33qLLn_CiXTrVg5JQvilGsKCfKgC4cR&_nc_ohc=KEoVJIESKyMQ7kNvwEVGZ7t&_nc_oc=AdnNHL4mdWXSY6agtXKRbx9By_r2ropGGdTdaVdDxMZI_Dh7jfS862bEGYrYbhFnTbxh_Nw4_96S7UXsdM4vTiWl&_nc_zt=23&_nc_ht=scontent.fmnl13-1.fna&_nc_gid=KihFTO1_GWq-8K1Y_LUR1w&oh=00_AfJGwrBcWOfLY67B-m9-XwzpxDpHW-c-NqPg5ExH6yunvQ&oe=685FF77E');">
+        <div class="p-6 sm:ml-64 min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+            
+            <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                
+                <!-- Left Side: Welcome Text -->
+                <div class="space-y-6 text-center md:text-left">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium mb-4">
+                        <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                        System Online
+                    </div>
+                    
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                        Welcome to <span class="text-green-600">SACLI-Q</span>
+                    </h1>
+                    
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        A seamless and efficient queuing system designed to optimize operations and enhance customer satisfaction at St. Anne College Lucena, Inc.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-4">
+                        <a href="{{ route('myQueues') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-all shadow-lg hover:shadow-green-500/30">
+                            <span class="material-symbols-outlined mr-2">group_work</span>
+                            My Queues
+                        </a>
+                        <a href="{{ route('queue.manage', ['id' => 1]) }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-200 text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-sm hover:shadow-md">
+                            <span class="material-symbols-outlined mr-2">dashboard</span>
+                            Go to Dashboard
+                        </a>
+                    </div>
                 </div>
+
+                <!-- Right Side: Visual/Illustration -->
+                <div class="relative">
+                    <div class="absolute -top-10 -right-10 w-72 h-72 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                    <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+                    
+                    <div class="relative bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <!-- Mockup of a Queue Card -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="w-1/2 h-4 bg-gray-200 rounded animate-pulse"></div>
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                </div>
+                            </div>
+                            <div class="w-3/4 h-8 bg-gray-100 rounded mb-2 animate-pulse"></div>
+                            <div class="w-1/2 h-4 bg-gray-50 rounded animate-pulse"></div>
+                        </div>
+
+                        <!-- Mockup of Stats -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-green-50 p-4 rounded-xl">
+                                <div class="text-green-600 font-bold text-xl mb-1">24</div>
+                                <div class="text-xs text-green-800">Waiting</div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-xl">
+                                <div class="text-blue-600 font-bold text-xl mb-1">102</div>
+                                <div class="text-xs text-blue-800">Served</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Foreground Content -->
-            <div class="flex flex-col items-center justify-center min-h-screen p-4 relative z-10">
-                <div class="max-w-4xl w-full bg-white shadow-2xl rounded-3xl p-10 border border-green-200 relative overflow-hidden">
-                    <div class="absolute inset-0 pointer-events-none">
-                        <svg class="w-full h-full" viewBox="0 0 400 400" fill="none">
-                            <circle cx="350" cy="50" r="80" fill="#b2dfdb" fill-opacity="0.2"/>
-                            <circle cx="60" cy="340" r="60" fill="#81c784" fill-opacity="0.15"/>
-                        </svg>
-                    </div>
-                    <h1 class="text-5xl font-extrabold text-green-800 text-center drop-shadow-lg z-10 relative">Welcome to Sacli Queue</h1>
-                    <p class="text-xl text-gray-700 mt-6 text-center z-10 relative">
-                         A seamless and efficient queuing system designed to improve waiting times and customer satisfaction.<br>
-                         Our system ensures smooth operations with a hassle-free experience.
-                    </p>
-                    <div class="w-full h-2 bg-gradient-to-r from-green-400 via-green-600 to-green-400 mt-8 rounded-full shadow-md z-10 relative"></div>
-                </div>
-            </div>
         </div>
     </x-slot>
 </x-Dashboard>

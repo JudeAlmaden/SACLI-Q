@@ -498,6 +498,7 @@ class QueueController extends Controller
     public function manageQueue($id)
     {
         $queue = Queue::with('windows')->findOrFail($id);
+        $user_id = Auth::id();
         $WindowIds = $queue->windows->pluck('id');
 
         // Get the number of tickets generated today for each window
@@ -507,7 +508,29 @@ class QueueController extends Controller
             ->groupBy('window_id')
             ->pluck('ticket_count', 'window_id');
 
-        return view('user.queuedetails', compact('queue', 'ticketsPerWindow'));
+        // Retrieve user permissions for this queue
+        $userAccess = WindowAccess::where('user_id', $user_id)
+            ->where('queue_id', $id)
+            ->get();
+
+        // Calculate permissions
+        $canCloseQueue = $userAccess->contains('can_close_queue', true);
+        $canClearQueue = $userAccess->contains('can_clear_queue', true);
+        $canCloseAnyWindow = $userAccess->contains('can_close_any_window', true);
+        $canChangeLimit = $userAccess->contains('can_change_ticket_limit', true);
+        
+        // Pass the raw access collection to check specific window assignment in view
+        // e.g. checking if user is assigned to window X: $userAccess->where('window_group_id', $window->id)->where('can_close_own_window', true)->isNotEmpty()
+
+        return view('user.queuedetails', compact(
+            'queue', 
+            'ticketsPerWindow', 
+            'canCloseQueue', 
+            'canClearQueue', 
+            'canCloseAnyWindow', 
+            'canChangeLimit',
+            'userAccess'
+        ));
     }
 
     //Showing the dashboard for queuing
@@ -538,13 +561,21 @@ class QueueController extends Controller
         $queue = Queue::findOrFail($queueId);
 
         // Check if the user has privileges to toggle the window
-        $accessExists = WindowAccess::where('user_id', $user->id)
-            ->where('queue_id', $queueId)
-            ->where(function ($query) {
-                $query->where('can_close_own_window', true)
-                    ->orWhere('can_close_any_window', true);
-            })
+        $user_id = $user->id;
+
+        // Check 1: Does the user have "Same Window" permission specifically for this window?
+        $canCloseOwn = WindowAccess::where('user_id', $user_id)
+            ->where('window_id', $window->id)
+            ->where('can_close_own_window', true)
             ->exists();
+
+        // Check 2: Does the user have "Any Window" permission on ANY window access record for this queue?
+        $canCloseAny = WindowAccess::where('user_id', $user_id)
+            ->where('queue_id', $queueId)
+            ->where('can_close_any_window', true)
+            ->exists();
+
+        $accessExists = $canCloseOwn || $canCloseAny;
 
         if (!$accessExists) {
             return response()->json(['success' => true, 'message' => 'You do not have the required privileges to perform this action.'], 403);

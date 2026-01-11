@@ -11,6 +11,7 @@
 <div class="bg-white rounded-xl shadow-md mb-12">
     <div class="p-6 border-b border-gray-200">
         <h2 class="text-xl font-bold text-gray-900">Users with Access</h2>
+        <p class="text-sm text-gray-500 mt-1">Manage user permissions for windows and queues.</p>
     </div>
     <div class="p-6">
         @if ($uniqueUsers->isNotEmpty())
@@ -19,11 +20,11 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="px-6 py-3 text-sm font-medium text-gray-700">User</th>
-                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Own Window</th>
-                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Any Window</th>
-                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Close Queue</th>
-                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Clear Queue</th>
-                            <th class="px-6 py-3 text-sm font-medium text-gray-700">Change Ticket Limit</th>
+                            <th class="px-6 py-3 text-sm font-medium text-gray-700" title="Allow user to close their assigned window">Close Assigned Window</th>
+                            <th class="px-6 py-3 text-sm font-medium text-gray-700" title="Allow user to close ANY window in this queue (Admin)">Close Any Window (Admin)</th>
+                            <th class="px-6 py-3 text-sm font-medium text-gray-700" title="Allow user to close the entire queue">Close Entire Queue</th>
+                            <th class="px-6 py-3 text-sm font-medium text-gray-700" title="Allow user to delete all tickets in the queue">Clear Queue</th>
+                            <th class="px-6 py-3 text-sm font-medium text-gray-700" title="Allow user to change the daily ticket limit for windows">Change Daily Ticket Limit</th>
                             <th class="px-6 py-3 text-sm font-medium text-gray-700">Actions</th>
                         </tr>
                     </thead>
@@ -98,7 +99,10 @@
                 </table>
             </div>
         @else
-            <p class="text-gray-600">No users have access to this queue.</p>
+            <div class="text-center py-8">
+                <p class="text-gray-500 text-lg">No users associated on any window.</p>
+                <p class="text-gray-400 text-sm mt-1">Go to the <strong>Window</strong> tab and add users to windows to see them here.</p>
+            </div>
         @endif
     </div>
 </div>
