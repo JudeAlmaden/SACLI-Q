@@ -110,6 +110,7 @@
                                             </div>
                                             <input type="text" 
                                                    id="name" 
+                                                   autocomplete="off"
                                                    name="name" 
                                                    required 
                                                    placeholder="Enter your full name (e.g., Juan Dela Cruz)" 
