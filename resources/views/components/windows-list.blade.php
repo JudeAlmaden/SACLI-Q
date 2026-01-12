@@ -19,7 +19,8 @@
                         </div>
                     </a>
                     <form action="{{ route('admin.window.delete', ['id' => $window->id]) }}" method="POST"
-                        class="border-t border-gray-200">
+                        class="border-t border-gray-200"
+                        onsubmit="return confirm('Are you sure you want to delete this window group? This action cannot be undone.');">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
@@ -39,36 +40,6 @@
                 <span class="mt-3 text-lg font-medium">Add New</span>
             </button>
         </div>
-    </div>
-</div>
-
-
-<!-- Modal -->
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-2xl font-semibold text-gray-900 mb-6">Add New Window Group</h2>
-        <form action="{{ route('admin.window.create', ['id' => $queue->id]) }}" method="POST" class="space-y-6">
-            @csrf
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                <input type="text" id="name" name="name"
-                    class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-green-300 transition"
-                    required>
-            </div>
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea id="description" name="description"
-                    class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-green-300 transition"
-                    rows="3" required></textarea>
-            </div>
-            <div class="flex justify-between">
-                <button type="button" onclick="toggleModal('modal')"
-                    class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition">Cancel</button>
-                <button type="submit"
-                    class="px-6 py-3 bg-green-700 text-white font-semibold rounded-md hover:bg-green-800 focus:ring focus:ring-green-300 transition">Add
-                    Window Group</button>
-            </div>
-        </form>
     </div>
 </div>
 

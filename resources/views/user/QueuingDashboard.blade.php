@@ -1,6 +1,9 @@
 <!-- filepath: /d:/XAMPP/htdocs/SACLIQueue/resources/views/QueuingDashboard.blade.php -->
 <x-Dashboard>
     <x-slot name="content">
+        @php
+            $hasWindowName = !empty($windowAccess->window_name);
+        @endphp
         <style>
             .control-btn {
                 transition: all 0.2s ease;
@@ -10,7 +13,52 @@
             }
         </style>
 
-        <div class="mt-16 p-6 sm:ml-64 bg-gray-50 min-h-screen">
+        <!-- Modal Overlay for Missing Window Name -->
+        @if(!$hasWindowName)
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+                <div class="text-center mb-6">
+                    <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Window Name Required</h2>
+                    <p class="text-gray-600">Please set a name for this window before you can start processing tickets.</p>
+                </div>
+
+                <form id="modal-window-form" class="space-y-4">
+                    <div>
+                        <label for="modal-window-name" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Window Name <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="modal-window-name" 
+                            name="window_name" 
+                            placeholder="e.g., Window 1, Cashier A, etc."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            required
+                            autofocus
+                        >
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                    >
+                        <i class="fas fa-save"></i>
+                        <span>Save and Continue</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
+
+        <!-- Hidden Audio for Notification -->
+        <audio id="notification-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+        </audio>
+
+        <div class="mt-16 p-6 sm:ml-64 bg-gray-50 min-h-screen {{ !$hasWindowName ? 'blur-sm pointer-events-none' : '' }}">
+            
             
             <!-- Top Controls & Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -60,7 +108,7 @@
 
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-2 gap-4 md:col-span-2">
-                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                     <div id="tickets-waiting-card" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center transition-all duration-300">
                         <span class="text-sm font-medium text-gray-500">Tickets Waiting</span>
                         <span id="upcoming-tickets-count" class="text-3xl font-bold text-gray-900 mt-2">--</span>
                     </div>
@@ -76,27 +124,27 @@
             <div class="mb-8">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Actions</h3>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <button id="next-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                    <button id="next-ticket" {{ !$hasWindowName ? 'disabled' : '' }} class="control-btn flex flex-col items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm hover:shadow-md h-32 {{ !$hasWindowName ? 'opacity-50 cursor-not-allowed' : '' }}">
                         <i class="fa-solid fa-play text-2xl mb-2"></i>
                         <span class="font-bold">Next Ticket</span>
                     </button>
 
-                    <button id="call-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                    <button id="call-ticket" {{ !$hasWindowName ? 'disabled' : '' }} class="control-btn flex flex-col items-center justify-center p-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-sm hover:shadow-md h-32 {{ !$hasWindowName ? 'opacity-50 cursor-not-allowed' : '' }}">
                         <i class="fa-solid fa-volume-high text-2xl mb-2"></i>
                         <span class="font-bold">Call Again</span>
                     </button>
 
-                    <button id="hold-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                    <button id="hold-ticket" {{ !$hasWindowName ? 'disabled' : '' }} class="control-btn flex flex-col items-center justify-center p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm hover:shadow-md h-32 {{ !$hasWindowName ? 'opacity-50 cursor-not-allowed' : '' }}">
                          <i class="fa-solid fa-pause text-2xl mb-2"></i>
                         <span class="font-bold">Put on Hold</span>
                     </button>
 
-                     <button id="next-ticket-hold" class="control-btn flex flex-col items-center justify-center p-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                     <button id="next-ticket-hold" {{ !$hasWindowName ? 'disabled' : '' }} class="control-btn flex flex-col items-center justify-center p-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-sm hover:shadow-md h-32 {{ !$hasWindowName ? 'opacity-50 cursor-not-allowed' : '' }}">
                          <i class="fa-solid fa-clock-rotate-left text-2xl mb-2"></i>
                         <span class="font-bold">Call from Hold</span>
                     </button>
 
-                    <button id="complete-ticket" class="control-btn flex flex-col items-center justify-center p-4 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-sm hover:shadow-md h-32">
+                    <button id="complete-ticket" {{ !$hasWindowName ? 'disabled' : '' }} class="control-btn flex flex-col items-center justify-center p-4 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-sm hover:shadow-md h-32 {{ !$hasWindowName ? 'opacity-50 cursor-not-allowed' : '' }}">
                          <i class="fa-solid fa-check text-2xl mb-2"></i>
                         <span class="font-bold">Complete</span>
                     </button>
@@ -133,34 +181,45 @@ $(document).ready(function() {
     var token = "{{ session('token') }}";
 
     var ticketNumber = null
-    //Updating Window name
+    // Updating Window name
+    // Handle both modal and inline form submissions
+    function submitWindowName(formId, inputId) {
+        const windowName = $(inputId).val();
+        if (!windowName || windowName.trim() === '') {
+            alert('Please enter a window name');
+            return;
+        }
+
+        $.ajax({
+            url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
+            method: 'POST',
+            data: {
+                window_name: windowName,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the window.');
+            }
+        });
+    }
+
     $('#window-form').on('submit', function (e) {
         e.preventDefault();
+        submitWindowName('#window-form', '#window-name');
+    });
 
-      const windowId = {{ $window->id ?? 'null' }};
-         const windowName = $('#window-name').val();
-
-         $.ajax({
-             url: "{{ route('updateWindowName', ['id' => $window->id]) }}",
-             method: 'POST',
-             data: {
-               window_name: windowName,
-                _token: '{{ csrf_token() }}'
-             },
-             success: function (response) {
-                 if (response.success) {
-                     location.reload();
-                     alert(response.message);
-                 } else {
-                     alert(response.message);
-                 }
-             },
-             error: function (xhr, status, error) {
-                 console.error('Error:', error);
-                 alert('An error occurred while updating the window.');
-             }
-         });
-     });
+    $('#modal-window-form').on('submit', function (e) {
+        e.preventDefault();
+        submitWindowName('#modal-window-form', '#modal-window-name');
+    });
 
     //Control Buttons
     $('#next-ticket').on('click', function(event) {
@@ -329,8 +388,28 @@ $(document).ready(function() {
             method: 'GET',
             success: function(response) {
                 if (response.success) {
-                    $('#upcoming-tickets-count').text(response.upcoming_tickets_count);
+                    const count = response.upcoming_tickets_count;
+                    $('#upcoming-tickets-count').text(count);
                     $('#completed-tickets-count').text(response.completed_tickets_count);
+                    
+                    // Dynamic color highlighting based on queue volume
+                    const card = $('#tickets-waiting-card');
+                    card.removeClass('border-gray-200 border-yellow-300 bg-yellow-50 border-red-400 bg-red-50 border-green-300 bg-green-50');
+                    $('#upcoming-tickets-count').removeClass('text-gray-900 text-yellow-700 text-red-700 text-green-700');
+                    
+                    if (count === 0) {
+                        card.addClass('border-green-300 bg-green-50');
+                        $('#upcoming-tickets-count').addClass('text-green-700');
+                    } else if (count >= 1 && count <= 5) {
+                        card.addClass('border-gray-200');
+                        $('#upcoming-tickets-count').addClass('text-gray-900');
+                    } else if (count >= 6 && count <= 15) {
+                        card.addClass('border-yellow-300 bg-yellow-50');
+                        $('#upcoming-tickets-count').addClass('text-yellow-700');
+                    } else {
+                        card.addClass('border-red-400 bg-red-50');
+                        $('#upcoming-tickets-count').addClass('text-red-700');
+                    }
                 } else {
                     alert(response.message);
                 }
@@ -350,11 +429,20 @@ $(document).ready(function() {
         getUpcomingTickets(upcomingTicketsPage);
     }
 
+    // Notification sound function
+    function playNotification() {
+        const audio = document.getElementById('notification-sound');
+        if (audio) {
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+    }
+
     getTablesAndData();
 
     //For Synchronous Session With Live View
     Echo.channel('live-queue.{{$window->queue_id}}')
     .listen('NewTicketEvent', () => {
+        playNotification(); // Play sound notification
         
         setTimeout(() => {
         getWindowUserData();

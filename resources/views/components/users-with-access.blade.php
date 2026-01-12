@@ -7,7 +7,12 @@
 
 <!-- CSRF Meta for AJAX -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
-
+<style>
+    input[type="checkbox"]{
+        width: 20px;
+        height: 20px;
+    }
+</style>
 <div class="bg-white rounded-xl shadow-md mb-12">
     <div class="p-6 border-b border-gray-200">
         <h2 class="text-xl font-bold text-gray-900">Users with Access</h2>

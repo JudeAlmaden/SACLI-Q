@@ -4,7 +4,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         @vite('resources/js/app.js')
         @vite('resources/css/app.css')
-        @vite('resources/js/jquery.js')
+        <!-- vite('resources/js/jquery.js') -->
 
              <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
         <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"> 

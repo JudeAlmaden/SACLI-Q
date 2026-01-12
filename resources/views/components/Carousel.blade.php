@@ -34,7 +34,7 @@
 <div id="startPrompt">Click or tap anywhere to start</div>
 
 <!-- Carousel Container -->
-<div class="relative h-full w-full overflow-hidden rounded-lg card">
+<div class="relative w-full overflow-hidden rounded-lg card bg-white" style="aspect-ratio: 16/9;">
   <!-- Carousel wrapper -->
   <div class="carousel-container relative z-0 flex transition-transform duration-500 ease-in-out w-full h-full">
 

@@ -1,80 +1,80 @@
 <x-Dashboard>
     <x-slot name="content">
-        <div class="p-6 sm:ml-64 bg-white min-h-screen flex flex-col items-center pt-20">
-            <div class="w-full max-w-6xl space-y-8 mt">
-                <!-- Window Details -->
-                <div class="shadow-lg p-6 border rounded-lg">
-                    <a href="{{route('admin.queue.view', ['id' => $window->queue_id])}}"
-                        class="text-blue-600 hover:text-blue-800 mb-4 inline-block">
-                        <i class="fas fa-arrow-left"></i>
+        <div class="mt-8 p-6 sm:ml-64 bg-gray-50 min-h-screen mb-32">
+            <div class="max-w-6xl mx-auto space-y-6">
+                <!-- Back Button & Header -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <a href="{{ route('admin.queue.view', ['id' => $window->queue_id]) }}"
+                        class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-4">
+                        <span class="material-symbols-outlined mr-2">arrow_back</span>
+                        Back to Queue
                     </a>
-                    <div class="flex items-center space-x-4 mb-4">
-                        <i class="fas fa-window-maximize text-3xl text-green-600"></i>
-                        <div>
-                            <h1 class="text-3xl font-bold">{{ $window->name }}</h1>
-                            <span class="text-gray-500">Window Details</span>
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-green-100 rounded-xl">
+                                <span class="material-symbols-outlined text-green-700 text-3xl">desktop_windows</span>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">{{ $window->name }}</h1>
+                                <p class="text-gray-500 text-sm">{{ $window->description }}</p>
+                            </div>
                         </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                            Active Window
+                        </span>
                     </div>
-                    <h2 class="text-lg font-bold">Description</h2>
-                    <p class="text-sm text-gray-700">{{ $window->description }}</p>
                 </div>
 
+                <!-- Analytics Component -->
                 <x-window-analytics :analytics="$analytics" :allUsers="$allUsers"/>
-                <!-- Assign Users -->
-                <div class="shadow-lg p-6 border rounded-lg">
-                    <h2 class="text-xl font-bold mb-4">Assign Users</h2>
+
+                <!-- Assign Users Card -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-xl p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Assign Users</h2>
                     @if ($allUsers->diff($users)->isNotEmpty())
-                        <form action="{{ route('admin.window.user.add', ['id' => $window->id]) }}" method="POST"
-                            class="space-y-4">
+                        <form action="{{ route('admin.window.user.add', ['id' => $window->id]) }}" method="POST" class="flex gap-3">
                             @csrf
-                            <select id="user_id" name="user_id" class="w-full p-2 border rounded">
-                                @foreach ($allUsers as $user)
-                                    @if (!$users->contains($user))
-                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->account_id }})</option>
-                                    @endif
+                            <select name="user_id" class="flex-1 p-2 border border-gray-200 rounded-lg">
+                                @foreach ($allUsers->diff($users) as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->account_id }})</option>
                                 @endforeach
                             </select>
-                            <button type="submit"
-                                class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">Assign</button>
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                Assign
+                            </button>
                         </form>
                     @else
-                        <p class="text-gray-700">All possible users have already been assigned</p>
+                        <p class="text-gray-500">All users have been assigned.</p>
                     @endif
                 </div>
 
-                <!-- Users with Access -->
-                <div class="shadow-lg p-6 border rounded-lg" style="margin-bottom:20%">
-                    <h2 class="text-xl font-bold mb-4">Users with Access</h2>
+                <!-- Users with Access Card -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-xl p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Users with Access ({{ $users->count() }})</h2>
                     @if ($users->isNotEmpty())
-                        <div class="overflow-x-auto">
-                            <table class="w-full border">
-                                <thead>
-                                    <tr class="bg-gray-100">
-                                        <th class="p-3 text-left text-sm font-medium text-gray-600">User</th>
-                                        <th class="p-3 text-left text-sm font-medium text-gray-600">Actions</th>
+                        <table class="w-full">
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach ($users as $user)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3">
+                                            <p class="font-medium text-gray-900">{{ $user->name }}</p>
+                                            <p class="text-sm text-gray-500">{{ $user->account_id }}</p>
+                                        </td>
+                                        <td class="py-3 text-right">
+                                            <form action="{{ route('admin.window.user.remove', ['id' => $window->id, 'user_id' => $user->id]) }}"
+                                                method="POST" class="inline"
+                                                onsubmit="return confirm('Remove {{ $user->name }}?');">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800">Remove</button>
+                                            </form>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($users as $user)
-                                        <tr class="border-t">
-                                            <td class="p-3 text-sm">{{ $user->name }} ({{$user->account_id}})</td>
-                                            <td class="p-3 text-sm">
-                                                <form
-                                                    action="{{ route('admin.window.user.remove', ['id' => $window->id, 'user_id' => $user->id]) }}"
-                                                    method="POST">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                                        <i class="fas fa-trash-alt"></i> Remove
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforeach
+                            </tbody>
+                        </table>
                     @else
-                        <p class="text-gray-700">No users have access.</p>
+                        <p class="text-gray-500">No users assigned yet.</p>
                     @endif
                 </div>
             </div>

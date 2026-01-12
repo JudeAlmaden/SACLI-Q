@@ -1,14 +1,6 @@
 # SACLI-Q
 ## USER MANUAL
 
-**JPCS BSIT-3**
-- Almaden, Justine Jude
-- Maningas, Genesis Johann
-- Dumaop, Andrei
-- Abrea, Jude Ivan
-- Del Monte, Reiner
-- Alvarez, Mark Louie
-
 **SY: 2024-2025**
 
 ---
@@ -68,7 +60,9 @@ server: {
 composer install
 php artisan migrate:fresh
 php artisan db:seed
+rm public/storage
 php artisan storage:link
+
 ```
 
 > **NOTE:** The **Admin** login credentials are defined in the seeder file `SACLIQueue/database/seeders/DatabaseSeeder.php`
@@ -149,6 +143,11 @@ Copy Links have the url for live view and ticketing.
 - URL for live queue
 - URL for ticketing
 
+#### Live Queue View
+The live queue view displays the current queue status in real-time for public display.
+
+![Live Queue View](Documentation/images/live.png)
+
 ### Windows Section
 Contains the list of windows associated with your queue. You can make one or view a window to assign users to have access on that window.
 
@@ -186,6 +185,11 @@ Description will be displayed for the ticketing to provide more information rega
 | ![View 13](Documentation/images/image30.png) | |
 
 ### Ticketing
+The ticketing system allows customers to get a queue number and wait for their turn.
+
+![Ticketing Page 1](Documentation/images/ticketing1.png)
+![Ticketing Page 2](Documentation/images/ticketing2.png)
+
 Select the ticket regardless of position in queue.
 
 ![Select Ticket](Documentation/images/image31.png)

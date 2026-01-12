@@ -76,7 +76,7 @@ class PublicController extends Controller
                 ->count();
 
             // Check if the ticket limit has been reached
-            if ($ticketsGeneratedToday >= $window->limit) {
+            if ($ticketsGeneratedToday >= $window->limit || $window->status == 'closed') {
                 // If the limit is reached, close the window and return an error
                 $window->status = 'closed';
                 $window->save();
@@ -108,7 +108,7 @@ class PublicController extends Controller
                 $numberPart = 1;
             }
 
-            $code = $prefix . str_pad($numberPart, 4, '0', STR_PAD_LEFT);
+            $code = $prefix . str_pad($numberPart, 3, '0', STR_PAD_LEFT);
 
             
             // Get the next ticket number for the window and increment it to 1 and it will use it for the ticket number here
@@ -139,8 +139,15 @@ class PublicController extends Controller
     public function ticketingSuccess($id)
     {
         $Ticket = Ticket::with('window')->whereDate('created_at', Carbon::today())->findOrFail($id);
-        $Queue = Queue::findOrFail($Ticket->queue_id);
-        return view('public.TicketReceipt', compact('Ticket', 'Queue'));
+        $Queue = Queue::findOrFail($Ticket->queue_id);        
+        $Position = Ticket::where('window_id', $Ticket->window_id)
+            ->where('status', 'Waiting')
+            ->whereDate('created_at', Carbon::today())
+            ->orderBy('created_at', 'asc')
+            ->pluck('id');
+            $Position = $Position->search($Ticket->id) + 1;
+
+        return view('public.TicketReceipt', compact('Ticket', 'Queue', 'Position'));
     }
 
 
