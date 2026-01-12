@@ -83,7 +83,7 @@ php artisan reverb:start --host=0.0.0.0 --port=8080
 
 Terminal 3:
 ```bash
-npm run dev
+npm run build
 ```
 
 ___The application should now be up and running on your local network___
