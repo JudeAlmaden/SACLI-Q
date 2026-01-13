@@ -129,17 +129,19 @@
         </div>
 
         @if(config('app.external_url'))
-        <div class="bg-white/90 max-h-[80%] backdrop-blur-sm p-3 h-full rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center justify-start transform hover:scale-[1.01] transition-all duration-300 w-full mb-2">
-            <div class="text-[9px] font-black text-green-700 mb-2 uppercase tracking-wider bg-green-100 px-3 py-1 rounded-full text-center shadow-sm">
+        <div class="bg-white/90 backdrop-blur-sm p-4 h-full rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center justify-start transform hover:scale-[1.01] transition-all duration-300 w-full mb-2">
+            <div class="text-sm font-black text-green-700 mb-4 uppercase tracking-wider bg-green-100 px-4 py-3 rounded-full text-center shadow-sm w-full leading-tight min-h-[3rem] flex items-center justify-center">
                 Scan to view your ticket even when you're away
             </div>
-            <div class="bg-white p-2 rounded-xl h-full p-16 shadow-inner border border-gray-100 flex justify-center w-full">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode(config('app.external_url')) }}" 
+            
+            <div class="bg-white p-8 rounded-xl shadow-inner border border-gray-100 flex justify-center items-center w-full flex-1 my-4 overflow-hidden">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode(config('app.external_url')) }}" 
                      alt="QR Code" 
-                     class=" aspect-square h-full object-contain" />
+                     class="w-2/3 aspect-square object-contain mx-auto" />
             </div>
-            <div class="mt-2 flex flex-col items-center">
-                <span class="text-[7px] uppercase font-bold text-gray-400 tracking-widest mb-0.5">View your ticket here!</span>
+
+            <div class="flex flex-col items-center mb-2">
+                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">View your ticket here!</span>
             </div>
         </div>
         @endif
