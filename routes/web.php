@@ -38,6 +38,7 @@ Route::get('/Sacli-Q.com/queue/{id}', [QueueController::class, 'viewQueue'])->na
 Route::get('/Sacli-Q.com/window/{id}', [QueueController::class, 'viewWindow'])->name('admin.window.view')->middleware(IsAdmin::class);
 Route::post('/Sacli-Q.com/window/add/{id}', [QueueController::class, 'createWindow'])->name('admin.window.create')->middleware(IsAdmin::class);
 Route::delete('/Sacli-Q.com/window/remove/{id}', [QueueController::class, 'removeWindow'])->name('admin.window.delete')->middleware(IsAdmin::class);
+Route::post('/Sacli-Q.com/window/clear/{id}', [QueueController::class, 'clearWindow'])->name('admin.window.clear')->middleware(ValidateUser::class);
 Route::post('/Sacli-Q.com/window/{id}/assignUser', [QueueController::class, 'assignUserToWindow'])->name('admin.window.user.add')->middleware(IsAdmin::class);
 Route::delete('/Sacli-Q.com/window/{id}/removeUser/{user_id}', [QueueController::class, 'removeUserFromWindow'])->name('admin.window.user.remove')->middleware(IsAdmin::class);
 

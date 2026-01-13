@@ -52,6 +52,12 @@ server: {
 }
 ```
 
+cloudflared installation
+winget install --id Cloudflare.cloudflared
+
+setup
+cloudflared tunnel --url http://localhost:8000
+
 #### 3. Application & Database Setup
 - Open a terminal in Visual Studio Code (inside the project directory)
 - Run the following commands one by one:
@@ -86,6 +92,8 @@ Terminal 3:
 npm run build
 ```
 
+OR
+''''Just run the START.bat file 
 ___The application should now be up and running on your local network___
 
 ---

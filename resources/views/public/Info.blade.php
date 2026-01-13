@@ -76,7 +76,7 @@
                 </p>
             @elseif($ticket->status === 'On Hold')
                 <p class="bg-blue-50 text-blue-700 p-2 rounded-md">
-                    This ticket has already been called and is currently on hold.
+                    This ticket has already been called and is currently on hold. You may ask the window for assitance.
                 </p>
             @elseif($ticket->status === 'Completed')
                 <p class="bg-blue-50 text-blue-700 p-2 rounded-md">

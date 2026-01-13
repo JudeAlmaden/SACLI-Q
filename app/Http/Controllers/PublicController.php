@@ -53,89 +53,78 @@ class PublicController extends Controller
 
     public function ticketingSubmit(Request $request)
     {
-        // Validate the request data
         $request->validate([
-            'queue_id' => 'required|exists:queues,id',
+            'queue_id'  => 'required|exists:queues,id',
             'window_id' => 'required|exists:windows,id',
-            'name' => 'nullable|string|max:255',
-        ], [
-            'window_id.required' => 'Please select what window to queue',
-            'window_id.exists' => 'The selected window group does not exist',
+            'name'      => 'nullable|string|max:255',
         ]);
-    
+
         try {
-            // Fetch the queue and window
             $window = Window::where('id', $request->window_id)
                 ->where('queue_id', $request->queue_id)
                 ->firstOrFail();
-    
-    
-            // Get the number of tickets generated today for the specific window
-            $ticketsGeneratedToday = Ticket::where('window_id', $request->window_id)
-                ->whereDate('created_at', Carbon::today())
+
+            // Close window if limit reached or closed
+            $todayCount = Ticket::where('window_id', $window->id)
+                ->whereDate('created_at', today())
                 ->count();
 
-            // Check if the ticket limit has been reached
-            if ($ticketsGeneratedToday >= $window->limit || $window->status == 'closed') {
-                // If the limit is reached, close the window and return an error
-                $window->status = 'closed';
-                $window->save();
-    
-                return back()->withErrors(['error' => 'The ticket limit for today has been reached. The window has been closed.']);
-            }
-    
-            // Generate a unique 6-character code
-            // Get the largest ticket code for this queue today
-            $latestTicket = Ticket::where('queue_id', $request->queue_id)
-                ->whereDate('created_at', Carbon::today())
-                ->orderByDesc('created_at')
-                ->first();
-
-            // First letter of the window name (uppercase)
-            $prefix = strtoupper(substr($window->name, 0, 1));
-
-            // Get the latest numeric part of the code for this window today
-            $latestCode = Ticket::where('window_id', $request->window_id)
-                ->whereDate('created_at', Carbon::today())
-                ->where('code', 'like', $prefix . '%')
-                ->orderByDesc('created_at')
-                ->pluck('code')
-                ->first();
-
-            if ($latestCode && preg_match('/' . $prefix . '(\d{4})/', $latestCode, $matches)) {
-                $numberPart = (int) $matches[1] + 1;
-            } else {
-                $numberPart = 1;
+            if ($todayCount >= $window->limit || $window->status === 'closed') {
+                $window->update(['status' => 'closed']);
+                return back()->withErrors(['error' => 'Window is closed or ticket limit reached.']);
             }
 
-            $code = $prefix . str_pad($numberPart, 3, '0', STR_PAD_LEFT);
+            /* =========================
+            DETERMINE WINDOW PREFIX (QUEUE-WIDE)
+            ========================== */
+            $letter = strtoupper(substr($window->name, 0, 1));
 
-            
-            // Get the next ticket number for the window and increment it to 1 and it will use it for the ticket number here
-            $ticket_number = Ticket::where('window_id', $request->window_id)
-                      ->whereDate('created_at', Carbon::today())
-                      ->max('ticket_number');
-            $ticket_number = $ticket_number ? $ticket_number + 1 : 1;
-    
-            // Create a new Ticket record
-            $Ticket = Ticket::create([
-                'queue_id' => $request->queue_id,
-                'ticket_number' => $ticket_number,
-                'window_id' => $request->window_id,
-                'name' => $request->name,
-                'status' => "Waiting",
-                'code' => $code,
+            // Get all windows in this queue with the same first letter, sorted by ID
+            $windowsWithSameLetter = Window::where('queue_id', $window->queue_id)
+                ->whereRaw('UPPER(LEFT(name, 1)) = ?', [$letter])
+                ->orderBy('id')
+                ->pluck('id')
+                ->toArray();
+
+            // Determine position of this window in that list
+            $position = array_search($window->id, $windowsWithSameLetter);
+            $prefix = $letter;
+            if ($position !== false && $position > 0) {
+                $prefix .= $position + 1; // C2, C3, etc.
+            }
+
+            /* =========================
+            TICKET NUMBER
+            ========================== */
+            $ticketNumber = Ticket::where('window_id', $window->id)
+                ->whereDate('created_at', today())
+                ->max('ticket_number');
+
+            $ticketNumber = $ticketNumber ? $ticketNumber + 1 : 1;
+
+            $code = $prefix . str_pad($ticketNumber, 3, '0', STR_PAD_LEFT);
+
+            /* =========================
+            CREATE TICKET
+            ========================== */
+            $ticket = Ticket::create([
+                'queue_id'       => $request->queue_id,
+                'window_id'      => $window->id,
+                'ticket_number'  => $ticketNumber,
+                'name'           => $request->name,
+                'status'         => 'Waiting',
+                'code'           => $code,
             ]);
-    
-            // Broadcast the new ticket event
-            broadcast(new NewTicketEvent($Ticket->queue_id));
-    
-            return redirect()->route('ticketing.success', ['id' => $Ticket->id]);
+
+            broadcast(new NewTicketEvent($ticket->queue_id));
+
+            return redirect()->route('ticketing.success', $ticket->id);
+
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'An error occurred while creating the ticket.']);
+            return back()->withErrors(['error' => 'Failed to create ticket.']);
         }
     }
-    
+
     public function ticketingSuccess($id)
     {
         $Ticket = Ticket::with('window')->whereDate('created_at', Carbon::today())->findOrFail($id);
@@ -187,7 +176,12 @@ class PublicController extends Controller
                                     ->pluck('id'); // Get list of ticket IDs in order of waiting
     
             // Find the position of the current ticket in the ordered list
-            $ticketPosition = $ticketPosition->search($ticket->id) + 1; // Position is 1-based index
+            $ticketPosition = Ticket::where('window_id', $Ticket->window_id)
+            ->where('status', 'Waiting')
+            ->whereDate('created_at', Carbon::today())
+            ->orderBy('created_at', 'asc')
+            ->pluck('id');
+            $Position = $Position->search($Ticket->id) + 1;
         }
     
         // Pass the ticket and position to the view

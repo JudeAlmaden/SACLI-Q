@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'account_id' => '0000-0001',
             'access_type' => 'admin',
-            'password' => bcrypt('pXajsdua132'),
+            'password' => bcrypt('0000-0001'), //pXajsdua132
         ]);
 
         // Create Main Building Queue

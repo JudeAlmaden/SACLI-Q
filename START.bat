@@ -1,3 +1,7 @@
+@echo off
+echo Starting Cloudflare Tunnel Setup...
+powershell -ExecutionPolicy Bypass -File setup_tunnel.ps1
+
 echo Starting Laravel server...
 start cmd /k php artisan serve --host=0.0.0.0 --port=8000
 

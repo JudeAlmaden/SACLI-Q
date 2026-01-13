@@ -12,12 +12,9 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 8880,
         strictPort: true,
-        hmr: {
-            host: '192.168.1.12', //Updated to current local IP
-        }
+        hmr: false,
+        // hmr: {
+        //     host: '192.168.1.12', //Updated to current local IP, Neeed for when i run dev
+        // }
     },
-    input: [
-        'resources/js/app.js',
-        'resources/js/echo.js',
-    ],
 });
