@@ -29,14 +29,15 @@
     background-blend-mode: normal;
   }
 </style>
-
+<!-- Single Gradient Overlay (global) -->
+<div class="gradient-overlay rounded-lg"></div>
 <!-- Start Prompt Overlay -->
 <div id="startPrompt">Click or tap anywhere to start</div>
 
 <!-- Carousel Container -->
-<div class="relative w-full overflow-hidden rounded-lg card bg-white" style="aspect-ratio: 16/9;">
+<div class=" w-full overflow-hidden rounded-lg card bg-black bg-opacity-80 h-full" >
   <!-- Carousel wrapper -->
-  <div class="carousel-container relative z-0 flex transition-transform duration-500 ease-in-out w-full h-full">
+  <div class="carousel-container  z-0 flex transition-transform duration-500 ease-in-out w-full h-full">
 
     @php
       $mediaAds = json_decode($queue->media_advertisement ?? '[]', true) ?? [];
@@ -48,7 +49,7 @@
           $extension = strtolower(pathinfo($mediaPath, PATHINFO_EXTENSION));
         @endphp
 
-        <div class="carousel-item relative flex-shrink-0 w-full h-full rounded-lg">
+        <div class="carousel-item  flex-shrink-0 w-full h-full rounded-lg">
           @if (in_array($extension, ['mp4', 'webm', 'ogg']))
             <video
               class="block w-full h-full object-contain carousel-media"
@@ -76,10 +77,8 @@
     @endif
 
   </div>
-
-  <!-- Single Gradient Overlay (global) -->
-  <div class="gradient-overlay rounded-lg"></div>
 </div>
+
 
 <!-- Carousel Script -->
 <script>
@@ -90,7 +89,7 @@
 
   let activeIndex = 0;
   let carouselStarted = false;
-  let timeoutId;
+  let timeoutId = 1000;
 
   function goToSlide(index) {
     const itemWidth = carouselItems[0].offsetWidth;
@@ -116,14 +115,14 @@
           activeIndex = (activeIndex + 1) % carouselItems.length;
           goToSlide(activeIndex);
           playNextMedia();
-        }, 10000);
+        }, 1000);
       });
     } else {
       timeoutId = setTimeout(() => {
         activeIndex = (activeIndex + 1) % carouselItems.length;
         goToSlide(activeIndex);
         playNextMedia();
-      }, 10000);
+      }, 7500);
     }
   }
 

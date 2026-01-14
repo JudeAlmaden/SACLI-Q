@@ -20,8 +20,7 @@
       }
 
       .area {
-        background: #a8e063;
-        background: -webkit-linear-gradient(to left, #f7ff00, #a8e063);
+        background: #5b9c0bff;
         width: 100%;
         height: 100%;
       }
@@ -73,7 +72,7 @@
         $duration = rand(10, 45);
         $delay = rand(0, 20);
         $right = rand(0, 95);
-        $rounded = rand(0, 10) < 3 ? 'border-radius: 10px;' : ''; // 30% chance to be rounded square
+        $rounded = rand(0, 10) < 6 ? 'border-radius: 60px;' : ''; // 60% chance to be rounded square
       @endphp
           <li style="
           width: {{ $size }}px;
@@ -89,15 +88,17 @@
     </div>
 
     <!--Main Content-->
-    <div class="flex flex-wrap min-h-screen">
+    <div class="flex flex-wrap min-h-screen ">
       <div class="{{ $hasAds ? 'w-2/3' : 'w-full' }} transition-all duration-500">
         <div class="grid grid-cols-1 gap-6 p-5 h-full relative">
           <!-- Window Groups Section -->
-          <div id="windows-container" class="p-6 rounded-lg shadow-2xl flex flex-col h-full relative card overflow-hidden">
+          <div id="windows-container" class="p-6 bg-white 0 rounded-lg shadow-2xl flex flex-col h-full relative card overflow-hidden">
             {{-- Header --}}
-            <div class="w-full flex items-center justify-between  bg-transparent">
+            <div class="w-full flex items-center justify-between ">
               <!-- Left Logo -->
-              <img src="/sacli_logo-remove-bg.png" alt="SACLI Logo" class="h-20 object-contain" />
+              <div class="bg-white p-1 rounded-full">
+                <img src="/sacli_logo-remove-bg.png" alt="SACLI Logo" class="h-20 object-contain " />
+              </div>
 
               <!-- Center Text -->
               <div class="flex flex-col items-center text-gray-900 border-b-2 border-gray-900 pb-2">
@@ -110,39 +111,39 @@
               </div>
 
               <!-- Right Logo -->
-              <img src="/jpcs_logo-remove-bg.png" alt="JPCS Logo" class="h-20 object-contain" />
+              <div class="bg-white p-1 rounded-full ">
+                <img src="/jpcs_logo-remove-bg.png" alt="JPCS Logo" class="h-20 object-contain" />
+              </div>
             </div>
 
             {{-- Live --}}
-            <div id="window-groups-list" class="text-lg text-gray-600 mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6 content-start overflow-y-auto flex-1 pb-4 pr-2">
+            <div id="window-groups-list" class="text-lg text-gray-600 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-6 content-start overflow-y-auto flex-1 pb-2 pr-2">
               Loading window groups...
             </div>
           </div>
         </div>
       </div>
 
-      @if($hasAds)
-      <div class="w-1/3 relative p-8 h-screen flex flex-col gap-4">
+      @if($hasAds && config('app.external_url'))
+      <div class="w-1/3 relative p-4 flex flex-col gap-4 max-h-screen">
         <!-- Carousel -->
-        <div class="flex-none">
-          <x-Carousel :queue="$queue" />
-        </div>
+         @if($hasAds)
+        <x-Carousel :queue="$queue" />
+        @endif
 
+        <!-- QR Code -->
         @if(config('app.external_url'))
-        <div class="bg-white/90 backdrop-blur-sm p-4 h-full rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center justify-start transform hover:scale-[1.01] transition-all duration-300 w-full mb-2">
-            <div class="text-sm font-black text-green-700 mb-4 uppercase tracking-wider bg-green-100 px-4 py-3 rounded-full text-center shadow-sm w-full leading-tight min-h-[3rem] flex items-center justify-center">
-                Scan to view your ticket even when you're away
+        <div class="bg-white p-4 rounded-2xl card border border-white/20 flex flex-col items-center justify-center transform hover:scale-[1.01] transition-all duration-300 w-full">
+            <div class="text-sm font-black text-green-700 mb-3 uppercase tracking-wider bg-green-100 px-4 py-3 rounded-full text-center shadow-sm w-full leading-tight min-h-[3rem] flex items-center justify-center">
+                Scan to view your ticket, even when you are away
             </div>
             
-            <div class="bg-white p-8 rounded-xl shadow-inner border border-gray-100 flex justify-center items-center w-full flex-1 my-4 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-inner border border-gray-100 flex justify-center items-center overflow-hidden h-[200px] h-full">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode(config('app.external_url')) }}" 
-                     alt="QR Code" 
-                     class="w-2/3 aspect-square object-contain mx-auto" />
+                     alt = "No QR Code"
+                     class="aspect-square object-contain mx-auto" />
             </div>
-
-            <div class="flex flex-col items-center mb-2">
-                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">View your ticket here!</span>
-            </div>
+              <span class="text-[11px] uppercase font-bold text-gray-500 tracking-widest">View your ticket here!</span>
         </div>
         @endif
       </div>
@@ -176,31 +177,27 @@
             response.windows.forEach(window => {
               const windowHtml = `
                                 <div class="p-5 border border-gray-200 rounded-lg shadow-xl bg-gray-50 h-full flex flex-col">
-                                  <h3 class="text-3xl font-bold text-gray-800 flex items-center mb-4 border-b border-gray-200 pb-2">
+                                  <h3 class="text-3xl font-bold text-gray-800 flex items-center border-b border-gray-200 pb-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                       <path fill-rule="evenodd" d="M9 3a7 7 0 1114 14A7 7 0 019 3zm0 1a6 6 0 10-.001 12.001A6 6 0 009 4z" clip-rule="evenodd" />
                                     </svg>
                                     ${window.name}
                                   </h3>
-                                  ${window.issuedTickets && window.issuedTickets.length > 0
-                  ? `<div class="overflow-hidden relative flex-1" style="max-height: 500px;">
+                                  ${window.issuedTickets && window.issuedTickets.length > 0 ? `<div class="overflow-hidden relative flex-1" style="max-height: 500px;">
                                             <ul class="mt-4 pl-0 space-y-4 auto-scroll h-full overflow-hidden">
-                                              ${window.issuedTickets
-                    .map(ticket => `
+                                              ${window.issuedTickets.map(ticket => `
                                                   <li>
-                                                    <div class="shadow-md relative bg-white border border-green-200 rounded-lg shadow p-6 flex flex-col min-h-[140px] justify-center">
+                                                    <div class="shadow-md relative bg-white border border-3 border-green-200 rounded-lg shadow p-6 flex flex-col min-h-[140px] justify-center">
                                                       <div class="text-7xl font-black text-green-700 text-center tracking-tighter">${ticket.code}</div>
                                                        ${window.window_name ? `<div class="absolute bottom-2 right-4 text-xl font-bold text-gray-500">${window.window_name}</div>` : ''}
                                                     </div>
                                                   </li>
                                                 `)
-                    .join('')}
+                                          .join('')}
                                             </ul>
                                         </div>`
-                  : `<p class="text-lg text-gray-600">Waiting</p>`
-                }
-                                </div>
-                                `
+                  : `<div class="flex items-center justify-center h-full"><div class="text-2xl font-black text-green-700 text-center">Waiting</div></div>`
+                }</div>`
               windowsContainer.append(windowHtml);
 
             });
@@ -239,53 +236,61 @@
       });
 
 
-    // Play "ding-dong" sound before speaking ticket number
     Echo.channel('live-queue.{{ $queue->id }}')
-      .listen('CallingTicket', (e) => {
-        setTimeout(() => {
-          const videos = document.querySelectorAll('video.carousel-media');
-          const originalVolumes = [];
+      .listen('CallingTicket', async (e) => {
+        // Wait 2 seconds before starting the speech (allows for visual updates/ding-dong)
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
+        const videos = document.querySelectorAll('video.carousel-media');
+        const originalVolumes = Array.from(videos).map(v => v.volume);
+
+        try {
           // Lower volume of all videos
-          videos.forEach((video, i) => {
-            originalVolumes[i] = video.volume;
-            video.volume = 0.1;  // or any low volume you prefer
+          videos.forEach(video => {
+            video.volume = 0.1;
           });
 
-            // Usage
-          speakTicketNumber(e.ticketNumber, e.windowName)
-            .then(() => {
-              // Restore original volumes after speaking
-              videos.forEach((video, i) => {
-                video.volume = originalVolumes[i];
-              });
-            })
-            .catch(error => {
-              console.error("Error speaking ticket number:", error);
-              // Restore original volumes in case of error
-              videos.forEach((video, i) => {
-                video.volume = originalVolumes[i];
-              });
-            });
-
-        }, 2000);
+          // Speak and wait for it to finish
+          await speakTicketNumber(e.ticketNumber, e.windowName);
+        } catch (error) {
+          console.error("Error during ticket announcement:", error);
+        } finally {
+          // Restore original volumes
+          videos.forEach((video, i) => {
+            video.volume = originalVolumes[i];
+          });
+        }
       });
 
 
-    async function speakTicketNumber(ticketNumber, windowName) {
-      const msg = new SpeechSynthesisUtterance();
+    function speakTicketNumber(ticketNumber, windowName) {
+      return new Promise((resolve, reject) => {
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = windowName
+          ? `Calling ticket number ${ticketNumber} to go to ${windowName}`
+          : `Calling ticket number ${ticketNumber}`;
 
-      msg.text = windowName
-        ? `Calling ticket number ${ticketNumber} to go to ${windowName}`
-        : `Calling ticket number ${ticketNumber}`;
+        console.log("Speaking:", msg.text);
+        
+        const voices = window.speechSynthesis.getVoices();
+        // Prefer Google US English, fallback to first available
+        msg.voice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google')) || voices[0];
+        msg.rate = 0.9;
+        msg.pitch = 1.1;
+        msg.volume = 1;
 
-      console.log("Speaking:", msg.text);
-      const voices = window.speechSynthesis.getVoices();
-      msg.voice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google')) || voices[0];
-      msg.rate = 0.9;
-      msg.pitch = 1.1;
-      msg.volume = 1;
-      window.speechSynthesis.speak(msg);
+        msg.onend = () => {
+          console.log("Speech finished");
+          resolve();
+        };
+
+        msg.onerror = (event) => {
+          console.error("SpeechSynthesisUtterance error", event);
+          reject(event);
+        };
+
+        window.speechSynthesis.speak(msg);
+      });
     }
 
   });
